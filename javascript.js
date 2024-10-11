@@ -35,38 +35,60 @@ const gameBoardModule = (function gameBoard() {
         return isWin;
     };
 
+    const checkArrayIsWin = (arr, curP) => {
+        let isWin = false;
+        const pieceArr = arr.map(cell => cell.getState());
+        for (let i = 0; i <= arr.length - 6; i++) { // at index 9 
+            if (pieceArr.slice(i,i+5).join('') === curP.repeat(5)) {
+                isWin = true;
+            }
+        }
+        return isWin;
+    }
+
     const checkRow = (rowNum, curPlayer) => {
         // check if row meets win condition
         // returns a boolean
-        console.log(rowNum);
+        // console.log(rowNum);
         const row = board[rowNum]; // row of Cells
-        printBoard();
-        console.log(row);
-        let isWin = false;
-        outerloop: for (let i = 0; i <= row.length - 6; i++) { // at index 9 
-            // check if current cell has curPlayer piece, return true or false
-            if (row[i].checkCellState(curPlayer)) {// if true, check next 4 pieces
-                for (let j = i + 1; j < i + 4; j++) {
-                    if (!row[j].checkCellState(curPlayer)) {
-                        // if j has no curPlayer piece, back to outer loop
-                        i = j;
-                        continue outerloop;
-                    }
-                    isWin = true;
-                    console.log(`${curPlayer} wins!`)
-                    return isWin;
-                }
-            }
-        }
-        console.log("no winners yet")
+        // console.log(row);
+        let isWin = checkArrayIsWin(row, curPlayer); // returns true or false
+        // outerloop: for (let i = 0; i <= row.length - 6; i++) { // at index 9 
+        //     // check if current cell has curPlayer piece, return true or false
+        //     if (row[i].checkCellState(curPlayer)) {// if true, check next 4 pieces
+        //         for (let j = i + 1; j < i + 4; j++) {
+        //             if (!row[j].checkCellState(curPlayer)) {
+        //                 // if j has no curPlayer piece, back to outer loop
+        //                 i = j;
+        //                 continue outerloop;
+        //             }
+        //             isWin = true;
+        //             console.log(`${curPlayer} wins!`)
+        //             return isWin;
+        //         }
+        //     }
+        // }
         return isWin;
     };
 
     const checkCol = (colNum, curPlayer) => {
-
+        const col = board.reduce((acc, curr)=>{
+            acc.push(curr[colNum]);
+            return acc;
+        },[]);
+        // console.log("in col");
+        // console.log(col)
+        let isWin = checkArrayIsWin(col, curPlayer);
+        return isWin;
     };
 
     const checkDiagnal = (rowNum, colNum, curPlayer) => {
+        // row index times row length plus = 1d coordinate
+        // top left to bottom right 16 difference
+        // top right to bottom left 14 difference
+
+        // const topLeft_bottomRight = ;
+        // const bottomLeft_topRight = [];
 
     };
 
@@ -90,7 +112,7 @@ function Unit(){
     }
 
     const checkCellState = (player) => {
-        console.log(player, state)
+        // console.log(player, state)
         return state === player;
     }
 
@@ -109,7 +131,7 @@ const gameLogicModule = (function gameLogic() {
     let curPlayer = player1;
 
     const switchPlayer = (cur) => {
-        console.log(cur);
+        // console.log(cur);
         curPlayer = cur === player1 ? player2 : player1;
     };
 
@@ -123,31 +145,29 @@ const gameLogicModule = (function gameLogic() {
             console.log("illegal inputs, please provide row and col between 0 and 15");
             return;
         }
-
-        console.log(`current player is ${curPlayer}`);
-        console.log(`current player ${curPlayer} placed a piece at row: ${row},
-                    col: ${col}`);
-        console.log(`current board looks like:`);
-
         
         // checking if the space is available
-        let {isAvailable, errorMessage} = checkSpace(gameBoard, row, col);
+        let {isAvailable, errorMessage} = checkSpaceIsEmpty(gameBoard, row, col);
         
-        if (isAvailable) {
+        if (isAvailable) { // place a piece
             gameBoard[row][col].setState(curPlayer);
-            gameBoardModule.checkBoardState(curPlayer, row, col);
-            
-            switchPlayer(curPlayer);
-            console.log("place piece success")
-            console.log(`current player is ${curPlayer}`);
+            console.log(`current player ${curPlayer} placed a piece at ${row}:${col}`);
         } else {
             console.log(errorMessage);
+        }
+
+        // check if current player wins
+        if (gameBoardModule.checkBoardState(curPlayer, row, col)) {
+            console.log(`${curPlayer} wins!`);
+        } else {
+            switchPlayer(curPlayer);
+            console.log(`${curPlayer}'s turn!`);
         }
  
         gameBoardModule.printBoard();
     }
 
-    const checkSpace = (board, row, col) => {
+    const checkSpaceIsEmpty = (board, row, col) => {
         let isAvailable = true;
         let errorMessage = "";
         if (!!board[row][col].getState()) {
