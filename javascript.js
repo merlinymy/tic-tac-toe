@@ -19,15 +19,62 @@ const gameBoardModule = (function gameBoard() {
     }
     
 
-    const checkState = () => {
-        console.table(board);
+    const checkBoardState = (curPlayer, row, col) => {
+        // logic to check if winning state exist
+        // connect 5 vertically, horizontally or diagonally
+        // casual rule, no restriction
+
+        // check board state for current player, after placed a piece
+        // check if connect 5 exist in horizontal line, vertical line and two
+        // diagonal lines
+        let isWin = false;
+        if (checkRow(row, curPlayer) || checkCol(col, curPlayer) ||
+            checkDiagnal(row, col, curPlayer)) {
+            isWin = true;
+        }
+        return isWin;
+    };
+
+    const checkRow = (rowNum, curPlayer) => {
+        // check if row meets win condition
+        // returns a boolean
+        console.log(rowNum);
+        const row = board[rowNum]; // row of Cells
+        printBoard();
+        console.log(row);
+        let isWin = false;
+        outerloop: for (let i = 0; i <= row.length - 6; i++) { // at index 9 
+            // check if current cell has curPlayer piece, return true or false
+            if (row[i].checkCellState(curPlayer)) {// if true, check next 4 pieces
+                for (let j = i + 1; j < i + 4; j++) {
+                    if (!row[j].checkCellState(curPlayer)) {
+                        // if j has no curPlayer piece, back to outer loop
+                        i = j;
+                        continue outerloop;
+                    }
+                    isWin = true;
+                    console.log(`${curPlayer} wins!`)
+                    return isWin;
+                }
+            }
+        }
+        console.log("no winners yet")
+        return isWin;
+    };
+
+    const checkCol = (colNum, curPlayer) => {
+
+    };
+
+    const checkDiagnal = (rowNum, colNum, curPlayer) => {
+
     };
 
     const printBoard = () => {
         const prettyBoard = board.map((row) => row.map((cell) => cell.getState()));
         console.log(prettyBoard);
     }
-    return {board, checkState, printBoard};
+    return {board, checkBoardState, printBoard};
 })();
 
 function Unit(){
@@ -42,7 +89,12 @@ function Unit(){
         return state;
     }
 
-    return {setState, getState};
+    const checkCellState = (player) => {
+        console.log(player, state)
+        return state === player;
+    }
+
+    return {setState, getState, checkCellState};
 }
 
 const playerFactory = function player() {
@@ -62,7 +114,7 @@ const gameLogicModule = (function gameLogic() {
     };
 
     const playRound = (row, col) => {
-        // check if row, col num legal
+        // check if row, col num is legal
         if (row == null || col == null) {
             console.log("illegal inputs, please provide row and col between 0 and 2");
             return;
@@ -76,21 +128,22 @@ const gameLogicModule = (function gameLogic() {
         console.log(`current player ${curPlayer} placed a piece at row: ${row},
                     col: ${col}`);
         console.log(`current board looks like:`);
-        // gameBoardModule.printBoard();
+
         
-        // current player place a tokken with logic checking if
-        // space is available
+        // checking if the space is available
         let {isAvailable, errorMessage} = checkSpace(gameBoard, row, col);
         
         if (isAvailable) {
             gameBoard[row][col].setState(curPlayer);
-            console.log("place piece success")
+            gameBoardModule.checkBoardState(curPlayer, row, col);
+            
             switchPlayer(curPlayer);
-            // gameBoardModule.printBoard();
+            console.log("place piece success")
             console.log(`current player is ${curPlayer}`);
         } else {
             console.log(errorMessage);
         }
+ 
         gameBoardModule.printBoard();
     }
 
