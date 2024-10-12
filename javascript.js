@@ -29,7 +29,8 @@ const gameBoardModule = (function gameBoard() {
         // diagonal lines
         let isWin = false;
         if (checkRow(row, curPlayer) || checkCol(col, curPlayer) ||
-            checkDiagnal(row, col, curPlayer)) {
+            checkInclineDiagnal(row, col, curPlayer) ||
+            checkDeclineDiagnal(row, col, curPlayer)) {
             isWin = true;
         }
         return isWin;
@@ -49,47 +50,61 @@ const gameBoardModule = (function gameBoard() {
     const checkRow = (rowNum, curPlayer) => {
         // check if row meets win condition
         // returns a boolean
-        // console.log(rowNum);
         const row = board[rowNum]; // row of Cells
-        // console.log(row);
         let isWin = checkArrayIsWin(row, curPlayer); // returns true or false
-        // outerloop: for (let i = 0; i <= row.length - 6; i++) { // at index 9 
-        //     // check if current cell has curPlayer piece, return true or false
-        //     if (row[i].checkCellState(curPlayer)) {// if true, check next 4 pieces
-        //         for (let j = i + 1; j < i + 4; j++) {
-        //             if (!row[j].checkCellState(curPlayer)) {
-        //                 // if j has no curPlayer piece, back to outer loop
-        //                 i = j;
-        //                 continue outerloop;
-        //             }
-        //             isWin = true;
-        //             console.log(`${curPlayer} wins!`)
-        //             return isWin;
-        //         }
-        //     }
-        // }
         return isWin;
     };
 
     const checkCol = (colNum, curPlayer) => {
+        // create col array
         const col = board.reduce((acc, curr)=>{
             acc.push(curr[colNum]);
             return acc;
         },[]);
-        // console.log("in col");
-        // console.log(col)
         let isWin = checkArrayIsWin(col, curPlayer);
         return isWin;
     };
+    const checkInclineDiagnal = (rowNum, colNum, curPlayer) => {
+        let startingRowIdx;
+        let startingColIdx;
+        if (rowNum + colNum == 14) {
+            startingRowIdx = 14;
+            startingColIdx = 0;
+        } else if (rowNum + colNum > 14) {
+            startingRowIdx = 14;
+            startingColIdx = rowNum + colNum - 14;
+        } else if (rowNum + colNum < 14) {
+            startingRowIdx = rowNum + colNum;
+            startingColIdx = 0
+        }
+        const bottomLeft_topRight = [];
+        while (startingRowIdx >= 0 && startingColIdx <= 14) {
+            bottomLeft_topRight.push(board[startingRowIdx--][startingColIdx++]);
+        }
+        let isWin = checkArrayIsWin(bottomLeft_topRight, curPlayer)
+        return isWin;
+    };
 
-    const checkDiagnal = (rowNum, colNum, curPlayer) => {
-        // row index times row length plus = 1d coordinate
-        // top left to bottom right 16 difference
-        // top right to bottom left 14 difference
+    const checkDeclineDiagnal = (rowNum, colNum, curPlayer) => {
+        // need to determine the starting cell of the dignal line
+        // first traverse back until row or col hits index 0
+        // row, col = (2,1)
+        // prev = (1,0)
 
-        // const topLeft_bottomRight = ;
-        // const bottomLeft_topRight = [];
+        const smallerIdx = Math.min(rowNum, colNum); // for determining where the
+        // diagnal line starts
+        let startingRowIdx = rowNum - smallerIdx;
+        let startingColIdx = colNum - smallerIdx;
 
+        // then traverse forward until either row or col hits index 14
+        // push each cell into the new array
+        const topLeft_bottomRight = [];
+        while (startingRowIdx <= 14 && startingColIdx <= 14) {
+            topLeft_bottomRight.push(board[startingRowIdx++][startingColIdx++]);
+        }
+
+        let isWin = checkArrayIsWin(topLeft_bottomRight, curPlayer)
+        return isWin;
     };
 
     const printBoard = () => {
