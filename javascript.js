@@ -11,13 +11,14 @@ const gameBoardModule = (function gameBoard() {
     const cols = 15;
     const rows = 15;
 
-    for (let i = 0; i < rows; i++) {
-        board[i] = [];
-        for (let j = 0; j < cols; j++) {
-            board[i].push(Unit());
+    const initBoard = () => {
+        for (let i = 0; i < rows; i++) {
+            board[i] = [];
+            for (let j = 0; j < cols; j++) {
+                board[i].push(Unit());
+            }
         }
     }
-    
 
     const checkBoardState = (curPlayer, row, col) => {
         // logic to check if winning state exist
@@ -81,7 +82,7 @@ const gameBoardModule = (function gameBoard() {
         while (startingRowIdx >= 0 && startingColIdx <= 14) {
             bottomLeft_topRight.push(board[startingRowIdx--][startingColIdx++]);
         }
-        let isWin = checkArrayIsWin(bottomLeft_topRight, curPlayer)
+        let isWin = checkArrayIsWin(bottomLeft_topRight, curPlayer);
         return isWin;
     };
 
@@ -111,7 +112,7 @@ const gameBoardModule = (function gameBoard() {
         const prettyBoard = board.map((row) => row.map((cell) => cell.getState()));
         console.log(prettyBoard);
     }
-    return {board, checkBoardState, printBoard};
+    return {board, checkBoardState, printBoard, initBoard};
 })();
 
 function Unit(){
@@ -141,9 +142,20 @@ const playerFactory = function player() {
 }
 
 const gameLogicModule = (function gameLogic() {
+    let gameBoard;
+    let isWin = false;
     const {player1, player2} = playerFactory();
-    const gameBoard = gameBoardModule.board;
-    let curPlayer = player1;
+    let curPlayer;
+
+    const startNewGame = () => {
+        gameBoardModule.initBoard();
+        console.log("game initiated");
+        curPlayer = player1;
+        gameBoard = gameBoardModule.board;
+        gameBoardModule.printBoard();
+    }
+
+
 
     const switchPlayer = (cur) => {
         // console.log(cur);
@@ -151,6 +163,11 @@ const gameLogicModule = (function gameLogic() {
     };
 
     const playRound = (row, col) => {
+        // check if winner exist, if true, can't place any pieces
+        if (isWin) {
+            console.log(`winner is ${curPlayer}, start a new game`);
+            return;
+        }
         // check if row, col num is legal
         if (row == null || col == null) {
             console.log("illegal inputs, please provide row and col between 0 and 2");
@@ -167,15 +184,18 @@ const gameLogicModule = (function gameLogic() {
         if (isAvailable) { // place a piece
             gameBoard[row][col].setState(curPlayer);
             console.log(`current player ${curPlayer} placed a piece at ${row}:${col}`);
+
+            // check if current player wins
+            if (gameBoardModule.checkBoardState(curPlayer, row, col)) {
+                console.log(`${curPlayer} wins!`);
+                isWin = true;
+            } else {
+                switchPlayer(curPlayer);
+                console.log(`${curPlayer}'s turn!`);
+            }
+
         } else {
             console.log(errorMessage);
-        }
-
-        // check if current player wins
-        if (gameBoardModule.checkBoardState(curPlayer, row, col)) {
-            console.log(`${curPlayer} wins!`);
-        } else {
-            switchPlayer(curPlayer);
             console.log(`${curPlayer}'s turn!`);
         }
  
@@ -192,6 +212,6 @@ const gameLogicModule = (function gameLogic() {
         return {isAvailable, errorMessage};
     }
     
-    return {playRound};
+    return {playRound, startNewGame};
 })();
 
