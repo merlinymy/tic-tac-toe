@@ -198,9 +198,25 @@ const gameLogicModule = (function gameLogic() {
 
         player1 = playerFactory(turn, 1);
         player2 = aiFactory(aiTurn, 2);
-        // player1 = turn; // x or o
-        
+        // player1 = turn; // x or o   
         curPlayer = player1.turn === "x" ? player1 : player2;
+    }
+
+    const startNewGameTwoBots = () => {
+        // bot vs bot
+        // x goes first
+        isWin = false;
+        isBotGame = true;
+        gameBoardModule.initBoard();
+        console.log("vs cpu game initiated");
+        gameBoard = gameBoardModule.board;
+        gameBoardModule.printBoard();
+
+        player1 = aiFactory("x", 2);
+        player2 = aiFactory("o", 2);
+        // player1 = turn; // x or o   
+        curPlayer = player1.turn === "x" ? player1 : player2;
+        playRound(8,8);
     }
 
     const switchPlayer = (cur) => {
@@ -264,6 +280,6 @@ const gameLogicModule = (function gameLogic() {
         return {isAvailable, errorMessage};
     }
     
-    return {playRound, startNewGame, startNewGameWithBot};
+    return {playRound, startNewGame, startNewGameWithBot, startNewGameTwoBots};
 })();
 
