@@ -135,27 +135,73 @@ function Unit(){
     return {setState, getState, checkCellState};
 }
 
-const playerFactory = function player() {
-    const player1 = "x";
-    const player2 = "o";
-    return {player1, player2};
+const utilFunctionModule = (() => {
+    const getRandomBetween = (min, max) => {
+        // code from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random#getting_a_random_integer_between_two_values_inclusive
+        const minCeiled = Math.ceil(min);
+        const maxFloored = Math.floor(max);
+        return Math.floor(Math.random() * (maxFloored - minCeiled + 1) + minCeiled); // The maximum is inclusive and the minimum is inclusive
+    }
+    
+    return {getRandomBetween};
+})()
+
+const playerFactory = function player(turn, label) {
+    // value of turn is either x (goes first) or o (sec)
+    // label: 1(human), 2(bot)
+    return {turn, label};
+}
+
+const aiFactory = function aiPlayer(turn, label) {
+    const ai = playerFactory(turn, label);
+    let aiRow;
+    let aiCol;
+    // level 0 logic, choose row and col randomly
+    const level0Logic = () => {
+        aiRow = utilFunctionModule.getRandomBetween(0,14);
+        aiCol = utilFunctionModule.getRandomBetween(0,14);
+        return {aiRow, aiCol};
+    }
+    return Object.assign({},ai, {level0Logic});
 }
 
 const gameLogicModule = (function gameLogic() {
     let gameBoard;
-    let isWin = false;
-    const {player1, player2} = playerFactory();
+    let isWin;
+    let player1;
+    let player2;
     let curPlayer;
+    let isBotGame;
 
     const startNewGame = () => {
+        // local two players
+        isWin = false;
         gameBoardModule.initBoard();
         console.log("game initiated");
-        curPlayer = player1;
         gameBoard = gameBoardModule.board;
         gameBoardModule.printBoard();
+        player1 = playerFactory("x", 1);
+        player2 = playerFactory("o", 1);
+        curPlayer = player1;
     }
 
+    const startNewGameWithBot = (turn) => {
+        // one player vs bot
+        // x goes first
+        let aiTurn = turn === "x" ? "o" : "x";
+        isWin = false;
+        isBotGame = true;
+        gameBoardModule.initBoard();
+        console.log("vs cpu game initiated");
+        gameBoard = gameBoardModule.board;
+        gameBoardModule.printBoard();
 
+        player1 = playerFactory(turn, 1);
+        player2 = aiFactory(aiTurn, 2);
+        // player1 = turn; // x or o
+        
+        curPlayer = player1.turn === "x" ? player1 : player2;
+    }
 
     const switchPlayer = (cur) => {
         // console.log(cur);
@@ -182,24 +228,30 @@ const gameLogicModule = (function gameLogic() {
         let {isAvailable, errorMessage} = checkSpaceIsEmpty(gameBoard, row, col);
         
         if (isAvailable) { // place a piece
-            gameBoard[row][col].setState(curPlayer);
-            console.log(`current player ${curPlayer} placed a piece at ${row}:${col}`);
+            gameBoard[row][col].setState(curPlayer.turn);
+            console.log(`current player ${curPlayer.turn} placed a piece at ${row}:${col}`);
 
             // check if current player wins
-            if (gameBoardModule.checkBoardState(curPlayer, row, col)) {
-                console.log(`${curPlayer} wins!`);
+            if (gameBoardModule.checkBoardState(curPlayer.turn, row, col)) {
+                console.log(`${curPlayer.turn} wins!`);
                 isWin = true;
+                gameBoardModule.printBoard();
+
             } else {
+                gameBoardModule.printBoard();
                 switchPlayer(curPlayer);
-                console.log(`${curPlayer}'s turn!`);
+                console.log(`${curPlayer.turn}'s turn!`);
+                if (curPlayer.label == 2) {
+                    const {aiRow, aiCol} = aiFactory().level0Logic();
+                    playRound(aiRow,aiCol);
+                }
             }
 
         } else {
             console.log(errorMessage);
-            console.log(`${curPlayer}'s turn!`);
+            console.log(`${curPlayer.turn}'s turn!`);
         }
  
-        gameBoardModule.printBoard();
     }
 
     const checkSpaceIsEmpty = (board, row, col) => {
@@ -212,6 +264,6 @@ const gameLogicModule = (function gameLogic() {
         return {isAvailable, errorMessage};
     }
     
-    return {playRound, startNewGame};
+    return {playRound, startNewGame, startNewGameWithBot};
 })();
 
