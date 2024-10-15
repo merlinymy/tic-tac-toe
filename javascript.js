@@ -12,6 +12,8 @@ const gameBoardModule = (function gameBoard() {
     const boardDiv = document.querySelector(".board");
 
     const initBoard = () => {
+        boardDiv.innerHTML = "";
+        document.documentElement.style.setProperty("--piece-url", "url(assets/black-sphere.png)");
         console.log("in initBoard")
         for (let i = 0; i < rows; i++) {
             board[i] = [];
@@ -299,7 +301,6 @@ const gameLogicModule = (function gameLogic() {
                 console.log(`${curPlayer.turn} wins!`);
                 isWin = true;
                 gameBoardModule.printBoard();
-
             } else {
                 gameBoardModule.printBoard();
                 switchPlayer(curPlayer);
