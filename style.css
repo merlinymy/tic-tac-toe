@@ -1,0 +1,84 @@
+* {
+    padding: 0;
+    margin: 0;
+}
+
+
+.cell {
+    position: relative;
+}
+
+.cell:hover {
+    background-color: lightblue;
+    border: 1px solid red;
+
+}
+
+.cell::before {
+    content: '';
+    position: absolute;
+    width: 1px;
+    height: 100%;
+    background: black;
+    left: 50%;
+    margin-left: -1px;
+}
+
+.cell[row='0']::before {
+    height: 50%;
+    top: 50%;
+}
+.cell[row='14']::before {
+    height: 50%;
+    bottom: 50%;
+}
+.cell[row='14']::before {
+    height: 50%;
+    bottom: 50%;
+}
+
+.cell.col-0::after {
+    width: 50%;
+    left: 50%;
+}
+
+.cell.col-14::after {
+    width: 50%;
+    right: 50%;
+}
+  
+.cell::after {
+    content: '';
+    position: absolute;
+    height: 1px;
+    width: 100%;
+    background: black;
+    top: 50%;
+    margin-top: -1px;
+}
+
+.cell[row='3'][col='3'],
+.cell[row='3'][col='7'],
+.cell[row='3'][col='11'],
+.cell[row='7'][col='3'],
+.cell[row='7'][col='7'],
+.cell[row='7'][col='11'],
+.cell[row='11'][col='3'],
+.cell[row='11'][col='7'],
+.cell[row='11'][col='11'] {
+    /* background: red; */
+    background: url(assets/dot-small-svgrepo-com.svg);
+}
+
+.board {
+    position: relative;
+    max-width: 500px;
+    height: 500px;
+    display: grid;
+    grid-template-columns: repeat(15, 1fr);
+    grid-template-rows: repeat(15, 1fr);
+    border: 2px solid black;
+    padding: -16.665px;
+    background-size: cover;
+    background-image: url(assets/oak-wood-texture-design-background.jpg);
+}

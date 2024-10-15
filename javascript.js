@@ -5,7 +5,6 @@
 // 15 x 15 board
 // connect 5 to win (verticle, horizontal, diagonal)
 
-
 const gameBoardModule = (function gameBoard() {
     const board = [];
     const cols = 15;
@@ -112,7 +111,27 @@ const gameBoardModule = (function gameBoard() {
         const prettyBoard = board.map((row) => row.map((cell) => cell.getState()));
         console.log(prettyBoard);
     }
-    return {board, checkBoardState, printBoard, initBoard};
+
+    const gameBoardUI = () => {
+        const boardDiv = document.querySelector(".board");
+        for (let i = 0; i <= 14; i++) {
+            for (let j = 0; j <= 14; j++) {
+                const cell = document.createElement("div");
+                cell.setAttribute("row",i);
+                cell.setAttribute("col",j);
+                cell.classList.add("cell");
+                if (j == 0) {
+                    cell.classList.add("col-0");
+                } 
+                if (j == 14) {
+                    cell.classList.add("col-14");
+                }
+                // cell.innerHTML = `<span class="material-symbols-outlined">add</span>`;
+                boardDiv.append(cell);
+            }
+        }
+    }
+    return {board, checkBoardState, printBoard, initBoard, gameBoardUI};
 })();
 
 function Unit(){
@@ -156,13 +175,31 @@ const aiFactory = function aiPlayer(turn, label) {
     const ai = playerFactory(turn, label);
     let aiRow;
     let aiCol;
+
     // level 0 logic, choose row and col randomly
     const level0Logic = () => {
         aiRow = utilFunctionModule.getRandomBetween(0,14);
         aiCol = utilFunctionModule.getRandomBetween(0,14);
         return {aiRow, aiCol};
     }
-    return Object.assign({},ai, {level0Logic});
+
+    // level 1 logic, rule based
+    // 1. check for immediate win (4 in a row)
+    // 2. block three or four in a row
+    // 3. place to form 2,3,4 in a row
+    // 4. place near center
+    const level1Logic = (gameBoard) => {
+        if (checkWin(gameBoard)) {
+            
+        }
+        return {aiRow, aiCol};
+    }
+
+
+
+
+
+    return Object.assign({},ai, {level0Logic, level1Logic});
 }
 
 const gameLogicModule = (function gameLogic() {
@@ -171,7 +208,6 @@ const gameLogicModule = (function gameLogic() {
     let player1;
     let player2;
     let curPlayer;
-    let isBotGame;
 
     const startNewGame = () => {
         // local two players
@@ -200,6 +236,9 @@ const gameLogicModule = (function gameLogic() {
         player2 = aiFactory(aiTurn, 2);
         // player1 = turn; // x or o   
         curPlayer = player1.turn === "x" ? player1 : player2;
+        if (player1.turn === "o") {
+            playRound(7,7);
+        }
     }
 
     const startNewGameTwoBots = () => {
@@ -283,3 +322,6 @@ const gameLogicModule = (function gameLogic() {
     return {playRound, startNewGame, startNewGameWithBot, startNewGameTwoBots};
 })();
 
+
+
+gameBoardModule.gameBoardUI();
