@@ -9,12 +9,28 @@ const gameBoardModule = (function gameBoard() {
     const board = [];
     const cols = 15;
     const rows = 15;
+    const boardDiv = document.querySelector(".board");
 
     const initBoard = () => {
+        console.log("in initBoard")
         for (let i = 0; i < rows; i++) {
             board[i] = [];
             for (let j = 0; j < cols; j++) {
                 board[i].push(Unit());
+                const cell = document.createElement("div");
+                cell.setAttribute("row",i);
+                cell.setAttribute("col",j);
+                cell.classList.add("cell");
+                if (j == 0) {
+                    cell.classList.add("col-0");
+                } 
+                if (j == 14) {
+                    cell.classList.add("col-14");
+                }
+                cell.addEventListener("click", (event) => {
+                    gameLogicModule.playRound(i,j, event.target);
+                });
+                boardDiv.append(cell);
             }
         }
     }
@@ -112,34 +128,24 @@ const gameBoardModule = (function gameBoard() {
         console.log(prettyBoard);
     }
 
-    const gameBoardUI = () => {
-        const boardDiv = document.querySelector(".board");
-        for (let i = 0; i <= 14; i++) {
-            for (let j = 0; j <= 14; j++) {
-                const cell = document.createElement("div");
-                cell.setAttribute("row",i);
-                cell.setAttribute("col",j);
-                cell.classList.add("cell");
-                if (j == 0) {
-                    cell.classList.add("col-0");
-                } 
-                if (j == 14) {
-                    cell.classList.add("col-14");
-                }
-                // cell.innerHTML = `<span class="material-symbols-outlined">add</span>`;
-                boardDiv.append(cell);
-            }
-        }
-    }
-    return {board, checkBoardState, printBoard, initBoard, gameBoardUI};
+    return {board, checkBoardState, printBoard, initBoard};
 })();
 
 function Unit(){
     // player piece
     let state = null;
 
-    const setState = (player) => {
+    const setState = (player, targetDiv) => {
         state = player;
+        const pieceDiv = document.createElement("div"); 
+        if (state === 'x') {//black piece
+            pieceDiv.classList.add("black-piece");
+        } else {
+            pieceDiv.classList.add("white-piece");
+        }
+        console.log("in set state");
+        console.log(targetDiv);
+        targetDiv.append(pieceDiv);
     }
 
     const getState = () => {
@@ -263,7 +269,7 @@ const gameLogicModule = (function gameLogic() {
         curPlayer = cur === player1 ? player2 : player1;
     };
 
-    const playRound = (row, col) => {
+    const playRound = (row, col, targetDiv) => {
         // check if winner exist, if true, can't place any pieces
         if (isWin) {
             console.log(`winner is ${curPlayer}, start a new game`);
@@ -283,7 +289,7 @@ const gameLogicModule = (function gameLogic() {
         let {isAvailable, errorMessage} = checkSpaceIsEmpty(gameBoard, row, col);
         
         if (isAvailable) { // place a piece
-            gameBoard[row][col].setState(curPlayer.turn);
+            gameBoard[row][col].setState(curPlayer.turn, targetDiv);
             console.log(`current player ${curPlayer.turn} placed a piece at ${row}:${col}`);
 
             // check if current player wins
@@ -322,6 +328,5 @@ const gameLogicModule = (function gameLogic() {
     return {playRound, startNewGame, startNewGameWithBot, startNewGameTwoBots};
 })();
 
-
-
-gameBoardModule.gameBoardUI();
+const local2Player = document.querySelector(".local2Player");
+local2Player.addEventListener("click", gameLogicModule.startNewGame);

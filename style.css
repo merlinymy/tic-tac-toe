@@ -70,6 +70,26 @@
     background: url(assets/dot-small-svgrepo-com.svg);
 }
 
+.white-piece {
+    background-image: url(assets/white-sphere.png);
+    background-size: contain;
+}
+
+.black-piece {
+    background-image: url(assets/black-sphere.png);
+    background-size: contain;
+}
+
+.white-piece, .black-piece {
+    height: 30px;
+    width: 30px;
+    position: absolute;
+    z-index: 3;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
 .board {
     position: relative;
     max-width: 500px;
