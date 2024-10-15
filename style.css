@@ -3,15 +3,17 @@
     margin: 0;
 }
 
+:root {
+    --piece-url: url(assets/black-sphere.png);
+}
 
 .cell {
     position: relative;
 }
 
-.cell:hover {
-    background-color: lightblue;
-    border: 1px solid red;
-
+.canvas>.board>.cell:hover {
+    background-image: var(--piece-url);
+    background-size: contain;
 }
 
 .cell::before {

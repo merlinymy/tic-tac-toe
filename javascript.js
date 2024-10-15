@@ -137,6 +137,8 @@ function Unit(){
 
     const setState = (player, targetDiv) => {
         state = player;
+        const nextPieceStyle = state === 'x' ? "url(assets/white-sphere.png)" : "url(assets/black-sphere.png)"
+        document.documentElement.style.setProperty("--piece-url", nextPieceStyle);
         const pieceDiv = document.createElement("div"); 
         if (state === 'x') {//black piece
             pieceDiv.classList.add("black-piece");
