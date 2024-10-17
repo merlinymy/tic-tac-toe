@@ -6,8 +6,7 @@
     <title>tic-toc-toe</title>
     <script src="javascript.js" defer></script>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=add" />
-</head>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=close" /></head>
 <body>
     <div class="canvas">
         <div class="header">
@@ -23,5 +22,64 @@
         </div>
         <div class="footer"></div>
     </div>
+    
+    <dialog id="game-option-dialog">
+        <div class="game-option-content">
+            <div class="play-against">
+                <p>Play Agianst</p>
+                <div class="options">
+                    <div class="human-player">Human</div>
+                    <div class="ai-player">Computer</div>
+                </div>
+            </div>
+            <div class="play-as">
+                <p>Play As</p>
+                <div class="options">
+                    <div class="play-as-black">Black</div>
+                    <div class="play-as-white">White</div>
+                </div>
+            </div>
+            <div class="difficulty">
+                <p>Difficulty</p>
+                <div class="options">
+                    <div class="easy">Easy</div>
+                    <div class="medium">Medium</div>
+                    <div class="hard">Hard</div>
+                </div>
+            </div>
+            <div class="buttons">
+                <button class="confirm">Confirm</button>
+                <button class="cancel">Cancel</button>
+            </div>
+        </div>
+    </dialog>
+
+    <dialog id="about-dialog">
+        <div class="about-header">
+            <h1>About</h1>
+            <div>
+                <span class="material-symbols-outlined close-icon">
+                    close
+                </span>
+            </div>
+        </div>
+        <div class="info">
+            <p><i><b>Gomoku</b></i>, also called <i>Five in a Row</i>, is an <a href="/wiki/Abstract_strategy_game" title="Abstract strategy game">abstract strategy</a> <a href="/wiki/Board_game" title="Board game">board game</a>. It is traditionally played with <a href="/wiki/Go_(game)" title="Go (game)">Go</a> pieces (black and white stones) on a 15×15 Go board<sup id="cite_ref-1" class="reference"><a href="#cite_note-1"><span class="cite-bracket">[</span>1<span class="cite-bracket">]</span></a></sup><sup id="cite_ref-2" class="reference"><a href="#cite_note-2"><span class="cite-bracket">[</span>2<span class="cite-bracket">]</span></a></sup> while in the past a 19×19 board was standard.<sup id="cite_ref-3" class="reference"><a href="#cite_note-3"><span class="cite-bracket">[</span>3<span class="cite-bracket">]</span></a></sup><sup id="cite_ref-4" class="reference"><a href="#cite_note-4"><span class="cite-bracket">[</span>4<span class="cite-bracket">]</span></a></sup> Because pieces are typically not moved or removed from the board, gomoku may also be played as a <a href="/wiki/Paper-and-pencil_game" title="Paper-and-pencil game">paper-and-pencil game</a>. The game is known in several countries under different names.
+            </p>
+            <h2>Rules</h2>
+            <p>Players alternate turns placing a stone of their color on an empty intersection. Black plays first. The winner is the first player to form an unbroken line of five stones of their color horizontally, vertically, or diagonally. In some rules, this line must be exactly five stones long; six or more stones in a row does not count as a win and is called an overline.<sup id="cite_ref-5" class="reference"><a href="#cite_note-5"><span class="cite-bracket">[</span>5<span class="cite-bracket">]</span></a></sup><sup id="cite_ref-:6_6-0" class="reference"><a href="#cite_note-:6-6"><span class="cite-bracket">[</span>6<span class="cite-bracket">]</span></a></sup> If the board is completely filled and no one has made a line of 5 stones, then the game ends in a draw.
+            </p>
+            <h2>Origin</h2>
+            <p>Historical records indicate that the origins of gomoku can be traced back to the mid-1700s during the Edo period. It is said that the 10th generation of Kuwanaya Buemon, a merchant who frequented the Nijō family, was highly skilled in this game, which subsequently spread among the people. By the late Edo period, around 1850, books had been published on gomoku.<sup id="cite_ref-7" class="reference"><a href="#cite_note-7"><span class="cite-bracket">[</span>7<span class="cite-bracket">]</span></a></sup> The earliest published book on gomoku that can be verified is the <i>Gomoku Jōseki Collection</i><span style="font-weight: normal"> (<span title="Japanese-language text"><span lang="ja">五石定磧集</span></span>)</span> in 1856.<sup id="cite_ref-8" class="reference"><a href="#cite_note-8"><span class="cite-bracket">[</span>8<span class="cite-bracket">]</span></a></sup>
+            </p>
+            <p>The name "gomoku" is from the <a href="/wiki/Japanese_language" title="Japanese language">Japanese language</a>, in which it is referred to as <i>gomokunarabe</i><span style="font-weight: normal"> (<span title="Japanese-language text"><span lang="ja">五目並べ</span></span>)</span>. <i>Go</i> means <a href="/wiki/5" title="5">five</a>, <i>moku</i> is a <a href="/wiki/Japanese_counter_word" title="Japanese counter word">counter word</a> for <a href="/wiki/Go_stone" class="mw-redirect" title="Go stone">pieces</a> and <i>narabe</i> means <i>line-up</i>. The game is popular in <a href="/wiki/China" title="China">China</a>, where it is called <i>Wuziqi</i> (五子棋).<sup id="cite_ref-9" class="reference"><a href="#cite_note-9"><span class="cite-bracket">[</span>9<span class="cite-bracket">]</span></a></sup> <i>Wu</i> (五 wǔ) means <i>five</i>, <i>zi</i> (子 zǐ) means <i>piece</i>, and <i>qi</i> (<a href="https://zh.wikipedia.org/wiki/%E6%A3%8B" class="extiw" title="zh:棋">棋</a> qí) refers to a board game category in Chinese. The game is also popular in <a href="/wiki/Korea" title="Korea">Korea</a>, where it is called <i>omok</i> (오목 [五目]) which has the same structure and origin as the Japanese name.
+            </p>
+            <p>In the nineteenth century, the game was introduced to Britain where it was known as <b>Go Bang</b>, said to be a corruption of the Japanese word <i><a href="/wiki/Go_board" class="mw-redirect" title="Go board">goban</a></i>, which was itself adapted from the Chinese <i>k'i pan (qí pán)</i> "go-board."<sup id="cite_ref-10" class="reference"><a href="#cite_note-10"><span class="cite-bracket">[</span>10<span class="cite-bracket">]</span></a></sup>
+            </p>
+        </div>
+    </dialog>
+
+
+
 </body>
 </html>

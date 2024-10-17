@@ -118,7 +118,7 @@ body {
 
 .black-piece-info {
     background-image: url(assets/black-sphere.png);
-    background-size: contain;
+    background-size: cover;
 }
 
 .white-piece-info {
@@ -168,13 +168,6 @@ body {
     background-image: var(--board-bg-img);
 }
 
-@media screen and (max-width: 700px){
-    .board {
-        width: 100vw;
-        height: 100vw;
-    }
-}
-
 .header {
     width: min(100vw, 700px);
     background-image: var(--board-bg-img);
@@ -185,6 +178,7 @@ body {
     display: flex;
     height: 3rem;
     font-size: 1.5rem;
+    flex-wrap:nowrap;
 }
 
 .header>div {
@@ -192,4 +186,101 @@ body {
     justify-content: center;
     align-items: center;
     padding: 1remc;
+}
+
+#about-dialog {
+    width: 700px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.25rem;
+    padding: 1rem;
+    box-shadow: 0px 0px 10px black;
+    border: none;
+    border-radius: 15px;
+    background-image: var(--board-bg-img);
+    background-size: contain;
+}
+.about-header {
+    display: flex;
+    margin-bottom: 1.25rem;
+    align-items: center;
+}
+
+.material-symbols-outlined.close-icon {
+    cursor: pointer;
+    color: black;
+    font-size: 50px;
+    transition: all 250ms;
+}
+
+.material-symbols-outlined.close-icon:hover {
+    cursor: pointer;
+    color: rgb(255, 149, 0);
+    font-size: 50px;
+    transition: all 250ms;
+}
+
+.about-header>h1 {
+    margin-right: auto;
+}
+#about-dialog > .info {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+#game-option-dialog {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.25rem;
+    padding: 1rem;
+    box-shadow: 0px 0px 10px black;
+    border: none;
+    border-radius: 15px;
+    background-image: var(--board-bg-img);
+    background-size: contain;
+}
+
+.game-option-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.game-option-content>div {
+    display: flex;
+    gap: 1rem;
+}
+
+.game-option-content>.buttons {
+    align-self: flex-end;
+}
+
+.options {
+    display: flex;
+    /* gap: 0.9rem; */
+    border: 1px solid grey;
+    
+}
+.options>div {
+    padding: 0.45rem;
+}
+.options>div:not(:last-child) {
+    
+    border-right: 1px solid grey;
+}
+
+@media screen and (max-width: 700px){
+    .board {
+        width: 100vw;
+        height: 100vw;
+    }
+
+    .header {
+        font-size: 1rem;
+    }
 }
