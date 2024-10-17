@@ -7,6 +7,29 @@
     --piece-url: url(assets/black-sphere.png);
 }
 
+:root.theme-light-wood {
+    --body-bg-img: url(assets/themes/wood-light/wood-texture-bg2.jpg);
+    --board-bg-img: url(assets/themes/wood-light/board-wood-texture.jpg);
+}
+
+body {
+    background-image: var(--body-bg-img);
+    /* background-size: cover; */
+}
+
+.canvas {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+}
+
+.footer {
+    width: 100vw;
+}
+
 .cell {
     position: relative;
 }
@@ -23,7 +46,7 @@
     height: 100%;
     background: black;
     left: 50%;
-    margin-left: -1px;
+    /* margin-left: -1px; */
 }
 
 .cell[row='0']::before {
@@ -82,9 +105,47 @@
     background-size: contain;
 }
 
-.white-piece, .black-piece {
+.game-info {
+    margin-left: 1rem;
+    margin-right: auto;
+}
+
+.game-info>div {
     height: 30px;
     width: 30px;
+    margin-right: 0.75rem;
+}
+
+.black-piece-info {
+    background-image: url(assets/black-sphere.png);
+    background-size: contain;
+}
+
+.white-piece-info {
+    background-image: url(assets/white-sphere.png);
+    background-size: contain;
+}
+
+.new-game {
+    margin-right: 1rem;
+    border-right: 1px solid grey;
+}
+
+.rules, .undo, .new-game {
+    border-left: 1px solid grey;
+    padding: 0px 0.75rem;
+    cursor: pointer;
+    /* border-right: 1px solid grey; */
+}
+
+.rules:hover, .undo:hover, .new-game:hover {
+    background-color: rgba(240, 248, 255, 0.374);
+    /* border-right: 1px solid grey; */
+}
+
+.white-piece, .black-piece {
+    height: 90%;
+    width: 90%;
     position: absolute;
     z-index: 3;
     top: 50%;
@@ -93,14 +154,42 @@
 }
 
 .board {
+    margin-top: auto;
+    display: block;
+    border-radius: 10px;
     position: relative;
-    max-width: 500px;
-    height: 500px;
+    width: 700px;
+    height: 700px;
     display: grid;
     grid-template-columns: repeat(15, 1fr);
     grid-template-rows: repeat(15, 1fr);
-    border: 2px solid black;
-    padding: -16.665px;
+    box-shadow: 0px 0px 10px rgb(0, 0, 0);
     background-size: cover;
-    background-image: url(assets/oak-wood-texture-design-background.jpg);
+    background-image: var(--board-bg-img);
+}
+
+@media screen and (max-width: 700px){
+    .board {
+        width: 100vw;
+        height: 100vw;
+    }
+}
+
+.header {
+    width: min(100vw, 700px);
+    background-image: var(--board-bg-img);
+    background-size: cover;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgb(0, 0, 0);
+    /* border: 2px solid black; */
+    display: flex;
+    height: 3rem;
+    font-size: 1.5rem;
+}
+
+.header>div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1remc;
 }

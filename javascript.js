@@ -205,10 +205,6 @@ const aiFactory = function aiPlayer(turn, label) {
         return {aiRow, aiCol};
     }
 
-
-
-
-
     return Object.assign({},ai, {level0Logic, level1Logic});
 }
 
@@ -218,6 +214,8 @@ const gameLogicModule = (function gameLogic() {
     let player1;
     let player2;
     let curPlayer;
+    const gameInfoText = document.querySelector(".game-info>p");
+    const gameInfoIcon = document.querySelector(".game-info>div");
 
     const startNewGame = () => {
         // local two players
@@ -229,6 +227,7 @@ const gameLogicModule = (function gameLogic() {
         player1 = playerFactory("x", 1);
         player2 = playerFactory("o", 1);
         curPlayer = player1;
+        // gameInfoText.textContent = "turn";
     }
 
     const startNewGameWithBot = (turn) => {
@@ -274,6 +273,7 @@ const gameLogicModule = (function gameLogic() {
     };
 
     const playRound = (row, col, targetDiv) => {
+        let pieceColor;
         // check if winner exist, if true, can't place any pieces
         if (isWin) {
             console.log(`winner is ${curPlayer}, start a new game`);
@@ -298,13 +298,18 @@ const gameLogicModule = (function gameLogic() {
 
             // check if current player wins
             if (gameBoardModule.checkBoardState(curPlayer.turn, row, col)) {
+                pieceColor = curPlayer.turn === 'x' ? 'black' : 'white'; 
+                gameInfoText.textContent = `WINS!`;
                 console.log(`${curPlayer.turn} wins!`);
                 isWin = true;
+                gameInfoIcon.className = `${pieceColor}-piece-info`;
                 gameBoardModule.printBoard();
             } else {
                 gameBoardModule.printBoard();
                 switchPlayer(curPlayer);
+                pieceColor = curPlayer.turn === 'x' ? 'black' : 'white'; 
                 console.log(`${curPlayer.turn}'s turn!`);
+                gameInfoIcon.className = `${pieceColor}-piece-info`;
                 if (curPlayer.label == 2) {
                     const {aiRow, aiCol} = aiFactory().level0Logic();
                     playRound(aiRow,aiCol);
@@ -314,6 +319,8 @@ const gameLogicModule = (function gameLogic() {
         } else {
             console.log(errorMessage);
             console.log(`${curPlayer.turn}'s turn!`);
+            pieceColor = curPlayer.turn === 'x' ? 'black' : 'white'; 
+            gameInfoIcon.className = `${pieceColor}-piece-info`;
         }
  
     }
@@ -331,5 +338,12 @@ const gameLogicModule = (function gameLogic() {
     return {playRound, startNewGame, startNewGameWithBot, startNewGameTwoBots};
 })();
 
-const local2Player = document.querySelector(".local2Player");
-local2Player.addEventListener("click", gameLogicModule.startNewGame);
+
+gameLogicModule.startNewGame();
+
+// testing
+document.documentElement.classList.add("theme-light-wood")
+// document.root
+
+
+// .classList.add("theme-light-wood");
