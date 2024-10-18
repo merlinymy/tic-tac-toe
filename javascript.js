@@ -229,6 +229,7 @@ const gameLogicModule = (function gameLogic() {
         isWin = false;
         gameBoardModule.initBoard();
         console.log("game initiated");
+        gameInfoText.textContent = "Your Turn";
         gameBoard = gameBoardModule.board;
         gameBoardModule.printBoard();
         player1 = playerFactory("x", 1);
@@ -245,6 +246,8 @@ const gameLogicModule = (function gameLogic() {
         isBotGame = true;
         gameBoardModule.initBoard(difficulty);
         console.log("vs cpu game initiated");
+        gameInfoText.textContent = "Your Turn";
+
         gameBoard = gameBoardModule.board;
         gameBoardModule.printBoard();
 
