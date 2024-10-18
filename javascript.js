@@ -364,8 +364,14 @@ const UIModule = (() => {
     const addListeners = (...args) => {
         for (const arg of args) {
             arg.addEventListener("click", (event)=>{
-                console.log(event.target);
+                const targetParent = event.target.parentElement;
+                // console.log(targetParent.children);
+                for (const child of targetParent.children) {
+                    child.id = "";
+                }
+                arg.id = "is-selected";
             });
+            // if (arg === humanPlayerBtn)
         }
     }
 

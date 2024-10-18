@@ -106,16 +106,6 @@ body {
     background-size: contain;
 }
 
-.game-info {
-    margin-left: 1rem;
-    margin-right: auto;
-}
-
-.game-info>div {
-    height: 30px;
-    width: 30px;
-    margin-right: 0.75rem;
-}
 
 .black-piece-info {
     background-image: url(assets/black-sphere.png);
@@ -129,20 +119,10 @@ body {
 
 .new-game {
     margin-right: 1rem;
-    border-right: 1px solid grey;
-}
-
-.rules, .undo, .new-game {
-    border-left: 1px solid grey;
-    padding: 0px 0.75rem;
-    cursor: pointer;
     /* border-right: 1px solid grey; */
 }
 
-.rules:hover, .undo:hover, .new-game:hover {
-    background-color: rgba(240, 248, 255, 0.374);
-    /* border-right: 1px solid grey; */
-}
+
 
 .white-piece, .black-piece {
     height: 90%;
@@ -176,10 +156,12 @@ body {
     border-radius: 10px;
     box-shadow: 0px 0px 10px rgb(0, 0, 0);
     /* border: 2px solid black; */
+    align-items: center;
     display: flex;
     height: 3rem;
     font-size: 1.5rem;
     flex-wrap:nowrap;
+    gap: 0.25rem;
 }
 
 .header>div {
@@ -188,6 +170,84 @@ body {
     align-items: center;
     padding: 1remc;
 }
+
+
+.game-info {
+    margin-left: 1rem;
+    margin-right: auto;
+}
+
+.game-info>div {
+    height: 30px;
+    width: 30px;
+    margin-right: 0.75rem;
+}
+
+/* div game-option-content */
+.game-option-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;   
+}
+
+.game-option-content>div {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.game-option-content>.buttons {
+    align-self: flex-end;
+}
+
+.rules, .undo, .new-game {
+    box-shadow: 0px 0px 5px black;
+    border: 1px solid grey;
+    padding: 0.45rem;
+    border-radius: 5px;
+    height: 2rem;
+}
+
+.rules:hover, .undo:hover, .new-game:hover {
+    cursor: pointer;
+    box-shadow: inset 0px 0px 0px black;
+    border: 1px solid rgba(100, 100, 100, 0.796);
+    padding: 0.45rem;
+    /* border-right: 1px solid grey; */
+}
+
+.rules:active, .undo:active, .new-game:active {
+    box-shadow: inset 0px 0px 5px black;
+    border: 1px solid grey;
+    padding: 0.45rem;
+}
+
+
+.options {
+    display: flex;   
+    gap: 0.25rem;
+}
+.options>div {
+    box-shadow: 0px 0px 5px black;
+    border: 1px solid grey;
+    padding: 0.45rem;
+    border-radius: 5px;
+}
+
+.options>div:hover {
+    cursor: pointer;
+    box-shadow: inset 0px 0px 0px black;
+    border: 1px solid rgba(100, 100, 100, 0.796);
+    padding: 0.45rem;
+}
+
+
+.options>div:active, #is-selected {
+    box-shadow: inset 0px 0px 5px black;
+    border: 1px solid grey;
+    padding: 0.45rem;
+}
+
 
 #about-dialog {
     width: 700px;
@@ -251,46 +311,8 @@ body {
     opacity: 0.5;
 }
 
-.game-option-content {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;   
-}
 
-.game-option-content>div {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
 
-.game-option-content>.buttons {
-    align-self: flex-end;
-}
-
-.options {
-    display: flex;   
-    gap: 0.25rem;
-}
-.options>div {
-    box-shadow: 0px 0px 5px black;
-    border: 1px solid grey;
-    padding: 0.45rem;
-    border-radius: 5px;
-}
-
-.options>div:hover {
-    cursor: pointer;
-    box-shadow: inset 0px 0px 0px black;
-    border: 1px solid rgba(100, 100, 100, 0.796);
-    padding: 0.45rem;
-}
-
-.options>div:active {
-    box-shadow: inset 0px 0px 5px black;
-    border: 1px solid grey;
-    padding: 0.45rem;
-    /* font-size: calc(1rem - 1px); */
-}
 
 
 
