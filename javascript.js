@@ -446,7 +446,8 @@ const UIModule = (() => {
         }
 
         if (humanOrAI && blackOrWhite && difficulty) {
-            const turn = blackOrWhite === "black" ? "x" : "o";
+            const turn = blackOrWhite.toLowerCase() === "black" ? "x" : "o";
+            console.log(turn);
             gameLogicModule.startNewGameWithBot(turn, difficulty);
         } else {
             gameLogicModule.startNewGame();
