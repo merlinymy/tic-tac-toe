@@ -338,29 +338,38 @@ const gameLogicModule = (function gameLogic() {
     return {playRound, startNewGame, startNewGameWithBot, startNewGameTwoBots};
 })();
 
+const UIModule = (() => {
+
+    const aboutDialog = document.querySelector("#about-dialog");
+    const aboutBtn = document.querySelector(".rules");
+    const dialogCloseBtn = document.querySelector(".material-symbols-outlined.close-icon");
+    const newGameBtn = document.querySelector(".new-game");
+    const gameOptionDialog = document.querySelector("#game-option-dialog");
+    const gameOptionConfirm = document.querySelector(".buttons>.confirm");
+    const gameOptionCancel = document.querySelector(".buttons>.cancel");
+    
+    aboutBtn.addEventListener("click", () => {
+        aboutDialog.showModal();
+    });
+    
+    dialogCloseBtn.addEventListener("click", ()=>{
+        aboutDialog.close();
+    });
+    
+    newGameBtn.addEventListener("click", () => {
+        gameOptionDialog.showModal();
+    })
+    
+    gameOptionCancel.addEventListener("click", () => {
+        gameOptionDialog.close();
+    });
+    // testing
+    document.documentElement.classList.add("theme-light-wood")
+    // document.root
+    
+})();
 
 gameLogicModule.startNewGame();
-
-const aboutDialog = document.querySelector("#about-dialog");
-const aboutBtn = document.querySelector(".rules");
-const dialogCloseBtn = document.querySelector(".material-symbols-outlined.close-icon");
-const newGameBtn = document.querySelector(".new-game");
-const gameOptionDialog = document.querySelector("#game-option-dialog");
-
-aboutBtn.addEventListener("click", () => {
-    aboutDialog.showModal();
-});
-
-dialogCloseBtn.addEventListener("click", ()=>{
-    aboutDialog.close();
-});
-
-newGameBtn.addEventListener("click", () => {
-    gameOptionDialog.showModal();
-})
-// testing
-document.documentElement.classList.add("theme-light-wood")
-// document.root
 
 
 // .classList.add("theme-light-wood");

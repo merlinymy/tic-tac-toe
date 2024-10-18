@@ -1,6 +1,7 @@
 * {
     padding: 0;
     margin: 0;
+    box-sizing: border-box;
 }
 
 :root {
@@ -232,27 +233,33 @@ body {
 }
 
 #game-option-dialog {
+    padding: 1rem;
+    border-radius: 10px;
+    background-image: var(--board-bg-img);
+    background-size: cover;
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 1.25rem;
-    padding: 1rem;
     box-shadow: 0px 0px 10px black;
     border: none;
     border-radius: 15px;
-    background-image: var(--board-bg-img);
-    background-size: contain;
+}
+
+#game-option-dialog::backdrop {
+    background-color: black;
+    opacity: 0.5;
 }
 
 .game-option-content {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 1.25rem;   
 }
 
 .game-option-content>div {
     display: flex;
+    align-items: center;
     gap: 1rem;
 }
 
@@ -261,18 +268,38 @@ body {
 }
 
 .options {
-    display: flex;
-    /* gap: 0.9rem; */
-    border: 1px solid grey;
-    
+    display: flex;   
+    gap: 0.25rem;
 }
 .options>div {
+    box-shadow: 0px 0px 5px black;
+    border: 1px solid grey;
+    padding: 0.45rem;
+    border-radius: 5px;
+}
+
+.options>div:hover {
+    cursor: pointer;
+    box-shadow: inset 0px 0px 0px black;
+    border: 1px solid rgba(100, 100, 100, 0.796);
     padding: 0.45rem;
 }
-.options>div:not(:last-child) {
-    
-    border-right: 1px solid grey;
+
+.options>div:active {
+    box-shadow: inset 0px 0px 5px black;
+    border: 1px solid grey;
+    padding: 0.45rem;
+    /* font-size: calc(1rem - 1px); */
 }
+
+
+
+
+
+/* .options>div:not(:last-child) {
+    
+    border-right: 1.5px solid rgba(0, 0, 0, 0.255);
+} */
 
 @media screen and (max-width: 700px){
     .board {
