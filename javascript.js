@@ -11,7 +11,7 @@ const gameBoardModule = (function gameBoard() {
     const rows = 15;
     const boardDiv = document.querySelector(".board");
 
-    const initBoard = () => {
+    const initBoard = (difficulty) => {
         boardDiv.innerHTML = "";
         document.documentElement.style.setProperty("--piece-url", "url(assets/black-sphere.png)");
         console.log("in initBoard")
@@ -30,7 +30,7 @@ const gameBoardModule = (function gameBoard() {
                     cell.classList.add("col-14");
                 }
                 cell.addEventListener("click", (event) => {
-                    gameLogicModule.playRound(i,j, event.target);
+                    gameLogicModule.playRound(i,j,event.target, difficulty);
                 });
                 boardDiv.append(cell);
             }
@@ -205,7 +205,14 @@ const aiFactory = function aiPlayer(turn, label) {
         return {aiRow, aiCol};
     }
 
-    return Object.assign({},ai, {level0Logic, level1Logic});
+    const level2Logic = (gameBoard) => {
+        if (checkWin(gameBoard)) {
+            
+        }
+        return {aiRow, aiCol};
+    }
+
+    return Object.assign({},ai, {level0Logic, level1Logic, level2Logic});
 }
 
 const gameLogicModule = (function gameLogic() {
@@ -230,13 +237,13 @@ const gameLogicModule = (function gameLogic() {
         // gameInfoText.textContent = "turn";
     }
 
-    const startNewGameWithBot = (turn) => {
+    const startNewGameWithBot = (turn, difficulty) => {
         // one player vs bot
         // x goes first
         let aiTurn = turn === "x" ? "o" : "x";
         isWin = false;
         isBotGame = true;
-        gameBoardModule.initBoard();
+        gameBoardModule.initBoard(difficulty);
         console.log("vs cpu game initiated");
         gameBoard = gameBoardModule.board;
         gameBoardModule.printBoard();
@@ -246,33 +253,16 @@ const gameLogicModule = (function gameLogic() {
         // player1 = turn; // x or o   
         curPlayer = player1.turn === "x" ? player1 : player2;
         if (player1.turn === "o") {
-            playRound(7,7);
+            const botMoveDiv = document.querySelector("div[row='7'][col='7']");
+            playRound(7,7,botMoveDiv,difficulty);
         }
     }
-
-    const startNewGameTwoBots = () => {
-        // bot vs bot
-        // x goes first
-        isWin = false;
-        isBotGame = true;
-        gameBoardModule.initBoard();
-        console.log("vs cpu game initiated");
-        gameBoard = gameBoardModule.board;
-        gameBoardModule.printBoard();
-
-        player1 = aiFactory("x", 2);
-        player2 = aiFactory("o", 2);
-        // player1 = turn; // x or o   
-        curPlayer = player1.turn === "x" ? player1 : player2;
-        playRound(8,8);
-    }
-
     const switchPlayer = (cur) => {
         // console.log(cur);
         curPlayer = cur === player1 ? player2 : player1;
     };
 
-    const playRound = (row, col, targetDiv) => {
+    const playRound = (row, col, targetDiv, difficulty) => {
         let pieceColor;
         // check if winner exist, if true, can't place any pieces
         if (isWin) {
@@ -309,10 +299,23 @@ const gameLogicModule = (function gameLogic() {
                 switchPlayer(curPlayer);
                 pieceColor = curPlayer.turn === 'x' ? 'black' : 'white'; 
                 console.log(`${curPlayer.turn}'s turn!`);
+                console.log(curPlayer.label);
                 gameInfoIcon.className = `${pieceColor}-piece-info`;
                 if (curPlayer.label == 2) {
-                    const {aiRow, aiCol} = aiFactory().level0Logic();
-                    playRound(aiRow,aiCol);
+                    console.log(difficulty);
+                    if (difficulty.toLowerCase() === 'easy') {
+                       const {aiRow, aiCol} = aiFactory().level0Logic();
+                       const botDiv = document.querySelector(`div[row="${aiRow}"][col="${aiCol}"]`);
+                       playRound(aiRow,aiCol,botDiv,difficulty);
+                    } else if (difficulty.toLowerCase() === 'medium') {
+                        const {aiRow, aiCol} = aiFactory().level1Logic();
+                        const botDiv = document.querySelector(`div[row=${aiRow}][col=${aiCol}]`)
+                        playRound(aiRow,aiCol,botDiv,difficulty);
+                    } else if (difficulty.toLowerCase() === 'hard') {
+                        const {aiRow, aiCol} = aiFactory().level2Logic();
+                        const botDiv = document.querySelector(`div[row=${aiRow}][col=${aiCol}]`)
+                        playRound(aiRow,aiCol,botDiv,difficulty);
+                    }
                 }
             }
 
@@ -335,7 +338,7 @@ const gameLogicModule = (function gameLogic() {
         return {isAvailable, errorMessage};
     }
     
-    return {playRound, startNewGame, startNewGameWithBot, startNewGameTwoBots};
+    return {playRound, startNewGame, startNewGameWithBot};
 })();
 
 const UIModule = (() => {
@@ -346,10 +349,9 @@ const UIModule = (() => {
     const newGameBtn = document.querySelector(".new-game");
     const gameOptionDialog = document.querySelector("#game-option-dialog");
 
+
     const humanPlayerBtn = document.querySelector(".human-player");
     const cpuPlayerBtn = document.querySelector(".ai-player");
-
-
 
     const asBlackBtn = document.querySelector(".play-as-black");
     const asWhiteBtn = document.querySelector(".play-as-white");
@@ -370,6 +372,34 @@ const UIModule = (() => {
                     child.id = "";
                 }
                 arg.id = "is-selected";
+                if (arg.className === "confirm" || arg.className === "cancel") {
+                    arg.id = "";
+                }
+
+                if (arg.className === "human-player") {
+                    const [playAgainst, ...otherDivs] = document.querySelectorAll(".options");
+                    console.log(otherDivs);
+                    for (const option of otherDivs) {
+                       for (const child of option.children) {
+                        child.id = "disabled-btns";
+                       }
+                    }
+                }
+
+                if (arg.className === "ai-player") {
+                    const [playAgainst, ...otherDivs] = document.querySelectorAll(".options");
+                    console.log(otherDivs);
+                    for (const option of otherDivs) {
+                       for (const child of option.children) {
+                        child.id = "";
+                        if (child.className === "play-as-black" ||
+                            child.className === "medium"
+                        ) {
+                            child.id = "is-selected";
+                        }
+                       }
+                    }
+                }
             });
             // if (arg === humanPlayerBtn)
         }
@@ -377,7 +407,50 @@ const UIModule = (() => {
 
     addListeners(humanPlayerBtn, cpuPlayerBtn, asBlackBtn, asWhiteBtn, easyBtn,
         mediumBtn, hardBtn, gameOptionConfirm, gameOptionCancel);
-    ;
+    
+    gameOptionConfirm.addEventListener("click", () => {
+        const optionDivs = document.querySelectorAll(".options");
+        let humanOrAI;
+        let blackOrWhite;
+        let difficulty;
+        for (const optionDiv of optionDivs) { 
+            for (const option of optionDiv.children) {
+                if (option.id === "is-selected") {
+                    console.log(option);
+
+                    if (option.className === "human-player" ||
+                        option.className === "ai-player"
+                    ) {
+                        humanOrAI = option.textContent;
+                        console.log(humanOrAI);
+                    }
+
+                    if (option.className === "play-as-black" ||
+                        option.className === "play-as-white"
+                    ) {
+                        blackOrWhite = option.textContent;
+                        console.log(blackOrWhite);
+                    }
+                    if (option.className === "easy" ||
+                        option.className === "medium" ||
+                        option.className === "hard"
+                    ) {
+                        difficulty = option.textContent;
+                        console.log(difficulty);
+                    }
+                }
+            }
+        }
+
+        if (humanOrAI && blackOrWhite && difficulty) {
+            const turn = blackOrWhite === "black" ? "x" : "o";
+            gameLogicModule.startNewGameWithBot(turn, difficulty);
+        } else {
+            gameLogicModule.startNewGame();
+        }
+        gameOptionDialog.close();
+    });
+
     aboutBtn.addEventListener("click", () => {
         aboutDialog.showModal();
     });
@@ -400,7 +473,7 @@ const UIModule = (() => {
 })();
 
 // UIModule.addListeners();
-gameLogicModule.startNewGame();
+gameLogicModule.startNewGameWithBot('x','easy');
 
 
 // .classList.add("theme-light-wood");

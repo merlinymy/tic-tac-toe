@@ -248,6 +248,11 @@ body {
     padding: 0.45rem;
 }
 
+#disabled-btns {
+    pointer-events: none;
+    opacity: 0.4;
+}
+
 
 #about-dialog {
     width: 700px;
