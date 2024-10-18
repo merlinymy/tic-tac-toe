@@ -345,9 +345,33 @@ const UIModule = (() => {
     const dialogCloseBtn = document.querySelector(".material-symbols-outlined.close-icon");
     const newGameBtn = document.querySelector(".new-game");
     const gameOptionDialog = document.querySelector("#game-option-dialog");
+
+    const humanPlayerBtn = document.querySelector(".human-player");
+    const cpuPlayerBtn = document.querySelector(".ai-player");
+
+
+
+    const asBlackBtn = document.querySelector(".play-as-black");
+    const asWhiteBtn = document.querySelector(".play-as-white");
+
+    const easyBtn = document.querySelector(".easy");
+    const mediumBtn = document.querySelector(".medium");
+    const hardBtn = document.querySelector(".hard");
+
     const gameOptionConfirm = document.querySelector(".buttons>.confirm");
     const gameOptionCancel = document.querySelector(".buttons>.cancel");
-    
+
+    const addListeners = (...args) => {
+        for (const arg of args) {
+            arg.addEventListener("click", (event)=>{
+                console.log(event.target);
+            });
+        }
+    }
+
+    addListeners(humanPlayerBtn, cpuPlayerBtn, asBlackBtn, asWhiteBtn, easyBtn,
+        mediumBtn, hardBtn, gameOptionConfirm, gameOptionCancel);
+    ;
     aboutBtn.addEventListener("click", () => {
         aboutDialog.showModal();
     });
@@ -369,6 +393,7 @@ const UIModule = (() => {
     
 })();
 
+// UIModule.addListeners();
 gameLogicModule.startNewGame();
 
 
