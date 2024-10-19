@@ -7,6 +7,7 @@
 
 const gameBoardModule = (function gameBoard() {
     const board = [];
+    const previousMoves = [];
     const cols = 15;
     const rows = 15;
     const boardDiv = document.querySelector(".board");
@@ -18,7 +19,7 @@ const gameBoardModule = (function gameBoard() {
         for (let i = 0; i < rows; i++) {
             board[i] = [];
             for (let j = 0; j < cols; j++) {
-                board[i].push(Unit());
+                board[i].push(unit());
                 const cell = document.createElement("div");
                 cell.setAttribute("row",i);
                 cell.setAttribute("col",j);
@@ -130,15 +131,21 @@ const gameBoardModule = (function gameBoard() {
         console.log(prettyBoard);
     }
 
-    return {board, checkBoardState, printBoard, initBoard};
+    return {board, previousMoves, checkBoardState, printBoard, initBoard};
 })();
 
-function Unit(){
+const unit = function unit(){
     // player piece
     let state = null;
+    let div = null;
+    let row, col;
 
     const setState = (player, targetDiv) => {
         state = player;
+        div = targetDiv;
+        row = targetDiv.getAttribute("row");
+        col = targetDiv.getAttribute("col");
+        console.log(row, col)
         const nextPieceStyle = state === 'x' ? "url(assets/white-sphere.png)" : "url(assets/black-sphere.png)"
         document.documentElement.style.setProperty("--piece-url", nextPieceStyle);
         const pieceDiv = document.createElement("div"); 
@@ -152,8 +159,13 @@ function Unit(){
         targetDiv.append(pieceDiv);
     }
 
+    const clearState = () => {
+        state = null;
+        div.innerHTML = "";
+        // cell.div.removeChild(divChild);
+    }
     const getState = () => {
-        return state;
+        return {state, row, col, div};
     }
 
     const checkCellState = (player) => {
@@ -161,7 +173,7 @@ function Unit(){
         return state === player;
     }
 
-    return {setState, getState, checkCellState};
+    return {setState, getState, checkCellState, clearState};
 }
 
 const utilFunctionModule = (() => {
@@ -185,38 +197,48 @@ const aiFactory = function aiPlayer(turn, label) {
     const ai = playerFactory(turn, label);
     let aiRow;
     let aiCol;
+    const gameBoard = gameBoardModule.board;
+    const previousMoves = gameBoardModule.previousMoves; //arr
+    
 
-    // level 0 logic, choose row and col randomly
-    const level0Logic = () => {
-        aiRow = utilFunctionModule.getRandomBetween(0,14);
-        aiCol = utilFunctionModule.getRandomBetween(0,14);
-        return {aiRow, aiCol};
+    const minimax = (rol, col) => {
+        // returns the score for the current evaluating position(aiRow, aiCol)
+        
+        // I can certainly check all available cells on the board.
+        // but it is not necessary. Because logically speaking, my next move should be somewhere near or next to mu previous move.
+        // So I can store all my moves and iterate the board from there.
+        // with bfs
+        return {rol, col, score};
     }
 
-    // level 1 logic, rule based
-    // 1. check for immediate win (4 in a row)
-    // 2. block three or four in a row
-    // 3. place to form 2,3,4 in a row
-    // 4. place near center
-    const level1Logic = (gameBoard) => {
+    // miniMax at depth 2
+    const level2Logic = () => {
+
+    }
+
+    // miniMax at depth 4
+    const level4Logic = (gameBoard) => {
         if (checkWin(gameBoard)) {
             
         }
         return {aiRow, aiCol};
     }
 
-    const level2Logic = (gameBoard) => {
+        // miniMax at depth 6
+
+    const level6Logic = (gameBoard) => {
         if (checkWin(gameBoard)) {
             
         }
         return {aiRow, aiCol};
     }
 
-    return Object.assign({},ai, {level0Logic, level1Logic, level2Logic});
+    return Object.assign({},ai, {level2Logic, level4Logic, level6Logic});
 }
 
 const gameLogicModule = (function gameLogic() {
     let gameBoard;
+    let previousMoves = gameBoardModule.previousMoves;
     let isWin;
     let player1;
     let player2;
@@ -231,6 +253,7 @@ const gameLogicModule = (function gameLogic() {
         console.log("game initiated");
         gameInfoText.textContent = "Your Turn";
         gameBoard = gameBoardModule.board;
+        previousMoves = gameBoardModule.previousMoves;
         gameBoardModule.printBoard();
         player1 = playerFactory("x", 1);
         player2 = playerFactory("o", 1);
@@ -245,6 +268,7 @@ const gameLogicModule = (function gameLogic() {
         isWin = false;
         isBotGame = true;
         gameBoardModule.initBoard(difficulty);
+        previousMoves = gameBoardModule.previousMoves;
         console.log("vs cpu game initiated");
         gameInfoText.textContent = "Your Turn";
 
@@ -284,11 +308,13 @@ const gameLogicModule = (function gameLogic() {
         
         // checking if the space is available
         let {isAvailable, errorMessage} = checkSpaceIsEmpty(gameBoard, row, col);
-        
+
+        // main logic
         if (isAvailable) { // place a piece
             gameBoard[row][col].setState(curPlayer.turn, targetDiv);
-            console.log(`current player ${curPlayer.turn} placed a piece at ${row}:${col}`);
 
+            previousMoves.push(gameBoard[row][col]) // Unit cell
+                        
             // check if current player wins
             if (gameBoardModule.checkBoardState(curPlayer.turn, row, col)) {
                 pieceColor = curPlayer.turn === 'x' ? 'black' : 'white'; 
@@ -307,7 +333,8 @@ const gameLogicModule = (function gameLogic() {
                 if (curPlayer.label == 2) {
                     console.log(difficulty);
                     if (difficulty.toLowerCase() === 'easy') {
-                       const {aiRow, aiCol} = aiFactory().level0Logic();
+                        // console.log("in playAround difficulty 2/easy")
+                       const {aiRow, aiCol} = aiFactory().level2Logic();
                        const botDiv = document.querySelector(`div[row="${aiRow}"][col="${aiCol}"]`);
                        playRound(aiRow,aiCol,botDiv,difficulty);
                     } else if (difficulty.toLowerCase() === 'medium') {
@@ -334,14 +361,32 @@ const gameLogicModule = (function gameLogic() {
     const checkSpaceIsEmpty = (board, row, col) => {
         let isAvailable = true;
         let errorMessage = "";
-        if (!!board[row][col].getState()) {
+        console.log(board[row][col].getState().state);
+        if (!!board[row][col].getState().state) {
+            
             isAvailable = false;
             errorMessage = "can't place piece, a piece exist";
         }
         return {isAvailable, errorMessage};
     }
+
+    const undo = () => {
+        if (curPlayer.label == 1) {//human player
+            previousMoves.pop().clearState();
+            switchPlayer(curPlayer);
+            pieceColor = curPlayer.turn === 'x' ? 'black' : 'white'; 
+            console.log(`${curPlayer.turn}'s turn!`);
+            console.log(curPlayer.label);
+            gameInfoIcon.className = `${pieceColor}-piece-info`;
+            const nextPieceStyle = curPlayer.turn === 'o' ? "url(assets/white-sphere.png)" : "url(assets/black-sphere.png)"
+            document.documentElement.style.setProperty("--piece-url", nextPieceStyle);
+        } else {
+            unit().clearState(previousMoves.pop());
+            unit().clearState(previousMoves.pop());
+        }
+    }
     
-    return {playRound, startNewGame, startNewGameWithBot};
+    return {playRound, startNewGame, startNewGameWithBot, undo};
 })();
 
 const UIModule = (() => {
@@ -351,6 +396,7 @@ const UIModule = (() => {
     const dialogCloseBtn = document.querySelector(".material-symbols-outlined.close-icon");
     const newGameBtn = document.querySelector(".new-game");
     const gameOptionDialog = document.querySelector("#game-option-dialog");
+    const undoBtn = document.querySelector(".undo");
 
 
     const humanPlayerBtn = document.querySelector(".human-player");
@@ -410,6 +456,12 @@ const UIModule = (() => {
 
     addListeners(humanPlayerBtn, cpuPlayerBtn, asBlackBtn, asWhiteBtn, easyBtn,
         mediumBtn, hardBtn, gameOptionConfirm, gameOptionCancel);
+
+    undoBtn.addEventListener("click", (event) => {
+        const row = event.target.getAttribute("row");
+        const col = event.target.getAttribute("col");
+        gameLogicModule.undo(row, col);
+    });
     
     gameOptionConfirm.addEventListener("click", () => {
         const optionDivs = document.querySelectorAll(".options");
