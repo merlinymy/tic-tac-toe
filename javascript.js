@@ -371,18 +371,18 @@ const gameLogicModule = (function gameLogic() {
     }
 
     const undo = () => {
+        if (previousMoves.length <= 0) return null;
         if (curPlayer.label == 1) {//human player
             previousMoves.pop().clearState();
             switchPlayer(curPlayer);
+
             pieceColor = curPlayer.turn === 'x' ? 'black' : 'white'; 
-            console.log(`${curPlayer.turn}'s turn!`);
-            console.log(curPlayer.label);
             gameInfoIcon.className = `${pieceColor}-piece-info`;
             const nextPieceStyle = curPlayer.turn === 'o' ? "url(assets/white-sphere.png)" : "url(assets/black-sphere.png)"
             document.documentElement.style.setProperty("--piece-url", nextPieceStyle);
         } else {
-            unit().clearState(previousMoves.pop());
-            unit().clearState(previousMoves.pop());
+            previousMoves.pop().clearState();
+            previousMoves.pop().clearState();
         }
     }
     
