@@ -58,7 +58,7 @@ const gameBoardModule = (function gameBoard() {
     const checkArrayIsWin = (arr, curP) => {
         let isWin = false;
         const pieceArr = arr.map(cell => cell.getState().state);
-        for (let i = 0; i <= arr.length - 6; i++) { // at index 9 
+        for (let i = 0; i <= arr.length; i++) { // at index 9 
             if (pieceArr.slice(i,i+5).join('') === curP.repeat(5)) {
                 isWin = true;
             }
@@ -100,6 +100,7 @@ const gameBoardModule = (function gameBoard() {
         while (startingRowIdx >= 0 && startingColIdx <= 14) {
             bottomLeft_topRight.push(board[startingRowIdx--][startingColIdx++]);
         }
+        console.log(bottomLeft_topRight.map((ele)=>ele.getState().state));
         let isWin = checkArrayIsWin(bottomLeft_topRight, curPlayer);
         return isWin;
     };
@@ -142,24 +143,28 @@ const unit = function unit(){
 
     const setState = (player, targetDiv) => {
         state = player;
-        div = targetDiv;
-        row = targetDiv.getAttribute("row");
-        col = targetDiv.getAttribute("col");
-        // console.log(row, col)
-        const nextPieceStyle = state === 'x' ? "url(assets/white-sphere.png)" : "url(assets/black-sphere.png)"
-        document.documentElement.style.setProperty("--piece-url", nextPieceStyle);
-        const pieceDiv = document.createElement("div"); 
-        if (state === 'x') {//black piece
-            pieceDiv.classList.add("black-piece");
-        } else {
-            pieceDiv.classList.add("white-piece");
+        if (targetDiv) {
+            div = targetDiv;
+            row = targetDiv.getAttribute("row");
+            col = targetDiv.getAttribute("col");
+            // console.log(row, col)
+            const nextPieceStyle = state === 'x' ? "url(assets/white-sphere.png)" : "url(assets/black-sphere.png)"
+            document.documentElement.style.setProperty("--piece-url", nextPieceStyle);
+            const pieceDiv = document.createElement("div"); 
+            if (state === 'x') {//black piece
+                pieceDiv.classList.add("black-piece");
+            } else {
+                pieceDiv.classList.add("white-piece");
+            }
+            targetDiv.append(pieceDiv);
         }
-        targetDiv.append(pieceDiv);
     }
 
     const clearState = () => {
         state = null;
-        div.innerHTML = "";
+        if (div) {
+            div.innerHTML = "";
+        }
         // cell.div.removeChild(divChild);
     }
     const getState = () => {
@@ -191,48 +196,227 @@ const playerFactory = function player(turn, label) {
     return {turn, label};
 }
 
+// chatGPT o1 generated
 const aiFactory = function aiPlayer(turn, label) {
     const ai = playerFactory(turn, label);
-    let aiRow;
-    let aiCol;
+    const aiTurn = turn; // 'x' or 'o'
+    const opponentTurn = aiTurn === 'x' ? 'o' : 'x';
     const gameBoard = gameBoardModule.board;
     const previousMoves = gameBoardModule.previousMoves; //arr
-    
 
-    const minimax = (rol, col) => {
-        // returns the score for the current evaluating position(aiRow, aiCol)
-        
-        // I can certainly check all available cells on the board.
-        // but it is not necessary. Because logically speaking, my next move should be somewhere near or next to mu previous move.
-        // So I can store all my moves and iterate the board from there.
-        // with bfs
-        return {rol, col, score};
-    }
+    // Level 1 Logic: Random Move
+    const level1Logic = () => {
+        let aiRow, aiCol;
+        do {
+            aiRow = utilFunctionModule.getRandomBetween(0, 14);
+            aiCol = utilFunctionModule.getRandomBetween(0, 14);
+        } while (gameBoard[aiRow][aiCol].getState().state !== null);
+        return { aiRow, aiCol };
+    };
 
-    // miniMax at depth 2
+    // Level 2 Logic: Rule-Based AI
     const level2Logic = () => {
-
-    }
-
-    // miniMax at depth 4
-    const level4Logic = (gameBoard) => {
-        if (checkWin(gameBoard)) {
-            
+        // If AI is white and it's the first move, prioritize center
+        if (aiTurn === 'o' && isFirstMove()) {
+            const centerRow = 7;
+            const centerCol = 7;
+            if (gameBoard[centerRow][centerCol].getState().state === null) {
+                return { aiRow: centerRow, aiCol: centerCol };
+            } else {
+                // Choose an adjacent cell around the center
+                const adjacentCells = getAdjacentEmptyCells(centerRow, centerCol);
+                if (adjacentCells.length > 0) {
+                    return adjacentCells[0]; // Return the first available adjacent cell
+                }
+            }
         }
-        return {aiRow, aiCol};
-    }
 
-        // miniMax at depth 6
+        // Try to win
+        console.log("try to win");
+        let move = findWinningMove(aiTurn);
+        if (move) return move;
 
-    const level6Logic = (gameBoard) => {
-        if (checkWin(gameBoard)) {
-            
+        console.log("block win");
+        // Block opponent's winning move
+        move = findWinningMove(opponentTurn);
+        if (move) return move;
+
+        console.log("block 3");
+        // Block opponent's connect 3
+        move = findBlockingMove(opponentTurn, 3);
+        if (move) return move;
+
+        console.log("build");
+        // Try to build our own connect 3 or 4
+        move = findBuildingMove(aiTurn);
+        if (move) return move;
+
+        // Fallback to random move
+        return level1Logic();
+    };
+
+    // Helper Functions
+    const isFirstMove = () => {
+        // Check if the AI has made any moves yet
+        for (let row = 0; row < 15; row++) {
+            for (let col = 0; col < 15; col++) {
+                if (gameBoard[row][col].getState().state === aiTurn) {
+                    return false;
+                }
+            }
         }
-        return {aiRow, aiCol};
-    }
+        return true;
+    };
 
-    return Object.assign({},ai, {level2Logic, level4Logic, level6Logic});
-}
+    const getAdjacentEmptyCells = (row, col) => {
+        const directions = [
+            { dr: -1, dc: 0 },
+            { dr: 1, dc: 0 },
+            { dr: 0, dc: -1 },
+            { dr: 0, dc: 1 },
+            { dr: -1, dc: -1 },
+            { dr: -1, dc: 1 },
+            { dr: 1, dc: -1 },
+            { dr: 1, dc: 1 },
+        ];
+        const cells = [];
+        for (let dir of directions) {
+            const r = row + dir.dr;
+            const c = col + dir.dc;
+            if (isValidCell(r, c) && gameBoard[r][c].getState().state === null) {
+                cells.push({ aiRow: r, aiCol: c });
+            }
+        }
+        return cells;
+    };
+
+    const findWinningMove = (player) => {
+        for (let row = 0; row < 15; row++) {
+            for (let col = 0; col < 15; col++) {
+                if (gameBoard[row][col].getState().state === null) {
+                    gameBoard[row][col].setState(player);
+                    if (gameBoardModule.checkBoardState(player, row, col)) {
+                        gameBoard[row][col].clearState();
+                        return { aiRow: row, aiCol: col };
+                    }
+                    gameBoard[row][col].clearState();
+                }
+            }
+        }
+        return null;
+    };
+
+    const findBlockingMove = (player, count) => {
+        for (let row = 0; row < 15; row++) {
+            for (let col = 0; col < 15; col++) {
+                if (gameBoard[row][col].getState().state === null) {
+                    gameBoard[row][col].setState(player);
+                    if (hasNInRow(player, row, col, count + 1)) {
+                        gameBoard[row][col].clearState();
+                        return { aiRow: row, aiCol: col };
+                    }
+                    gameBoard[row][col].clearState();
+                }
+            }
+        }
+        return null;
+    };
+
+    const findBuildingMove = (player) => {
+        let bestMove = null;
+        let maxCount = 0;
+        for (let row = 0; row < 15; row++) {
+            for (let col = 0; col < 15; col++) {
+                if (gameBoard[row][col].getState().state === null) {
+                    gameBoard[row][col].setState(player);
+                    let count = getMaxLineLength(player, row, col);
+                    if (count > maxCount) {
+                        maxCount = count;
+                        bestMove = { aiRow: row, aiCol: col };
+                    }
+                    gameBoard[row][col].clearState();
+                }
+            }
+        }
+        console.log(bestMove);
+        return bestMove;
+    };
+
+    const hasNInRow = (player, row, col, n) => {
+        const directions = [
+            { dr: -1, dc: 0 },
+            { dr: 1, dc: 0 },
+            { dr: 0, dc: -1 },
+            { dr: 0, dc: 1 },
+            { dr: -1, dc: -1 },
+            { dr: -1, dc: 1 },
+            { dr: 1, dc: -1 },
+            { dr: 1, dc: 1 },
+        ];
+        for (let dir of directions) {
+            let count = 1;
+            let r = row + dir.dr;
+            let c = col + dir.dc;
+            while (isValidCell(r, c) && gameBoard[r][c].getState().state === player) {
+                count++;
+                r += dir.dr;
+                c += dir.dc;
+            }
+            r = row - dir.dr;
+            c = col - dir.dc;
+            while (isValidCell(r, c) && gameBoard[r][c].getState().state === player) {
+                count++;
+                r -= dir.dr;
+                c -= dir.dc;
+            }
+            if (count >= n) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    const getMaxLineLength = (player, row, col) => {
+        const directions = [
+            { dr: -1, dc: 0 },
+            { dr: 0, dc: -1 },
+            { dr: -1, dc: -1 },
+            { dr: -1, dc: 1 },
+        ];
+        let maxCount = 1;
+        for (let dir of directions) {
+            let count = 1;
+            let r = row + dir.dr;
+            let c = col + dir.dc;
+            while (isValidCell(r, c) && gameBoard[r][c].getState().state === player) {
+                count++;
+                r += dir.dr;
+                c += dir.dc;
+            }
+            r = row - dir.dr;
+            c = col - dir.dc;
+            while (isValidCell(r, c) && gameBoard[r][c].getState().state === player) {
+                count++;
+                r -= dir.dr;
+                c -= dir.dc;
+            }
+            if (count > maxCount) {
+                maxCount = count;
+            }
+        }
+        return maxCount;
+    };
+
+    const isValidCell = (row, col) => {
+        return row >= 0 && row < 15 && col >= 0 && col < 15;
+    };
+
+    return Object.assign({}, ai, { level1Logic, level2Logic });
+};
+
+
+// generated code ends
+
 
 const gameLogicModule = (function gameLogic() {
     let gameBoard;
@@ -334,17 +518,16 @@ const gameLogicModule = (function gameLogic() {
                     console.log(difficulty);
                     if (difficulty.toLowerCase() === 'easy') {
                         // console.log("in playAround difficulty 2/easy")
-                       const {aiRow, aiCol} = aiFactory().level2Logic();
+                       const {aiRow, aiCol} = aiFactory().level1Logic();
                        const botDiv = document.querySelector(`div[row="${aiRow}"][col="${aiCol}"]`);
                        playRound(aiRow,aiCol,botDiv,difficulty);
                     } else if (difficulty.toLowerCase() === 'medium') {
-                        const {aiRow, aiCol} = aiFactory().level1Logic();
-                        const botDiv = document.querySelector(`div[row=${aiRow}][col=${aiCol}]`)
+                        const {aiRow, aiCol} = player2.level2Logic();
+                        console.log(aiRow, aiCol)
+                        const botDiv = document.querySelector(`div[row="${aiRow}"][col="${aiCol}"]`)
                         playRound(aiRow,aiCol,botDiv,difficulty);
                     } else if (difficulty.toLowerCase() === 'hard') {
-                        const {aiRow, aiCol} = aiFactory().level2Logic();
-                        const botDiv = document.querySelector(`div[row=${aiRow}][col=${aiCol}]`)
-                        playRound(aiRow,aiCol,botDiv,difficulty);
+                        // const {aiRow, aiCol} = aiFactory().level6Logic(); 
                     }
                 }
             }
@@ -372,7 +555,7 @@ const gameLogicModule = (function gameLogic() {
 
     const undo = () => {
         if (previousMoves.length <= 0) return null;
-        if (curPlayer.label == 1) {//human player
+        if (player2.label == 1) {//human player
             previousMoves.pop().clearState();
             switchPlayer(curPlayer);
 
@@ -528,7 +711,7 @@ const UIModule = (() => {
 })();
 
 // UIModule.addListeners();
-gameLogicModule.startNewGameWithBot('x','easy');
+gameLogicModule.startNewGameWithBot('x','medium');
 
 
 // .classList.add("theme-light-wood");
