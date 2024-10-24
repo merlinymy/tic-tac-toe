@@ -57,7 +57,7 @@ const gameBoardModule = (function gameBoard() {
 
     const checkArrayIsWin = (arr, curP) => {
         let isWin = false;
-        const pieceArr = arr.map(cell => cell.getState());
+        const pieceArr = arr.map(cell => cell.getState().state);
         for (let i = 0; i <= arr.length - 6; i++) { // at index 9 
             if (pieceArr.slice(i,i+5).join('') === curP.repeat(5)) {
                 isWin = true;
@@ -127,7 +127,7 @@ const gameBoardModule = (function gameBoard() {
     };
 
     const printBoard = () => {
-        const prettyBoard = board.map((row) => row.map((cell) => cell.getState()));
+        const prettyBoard = board.map((row) => row.map((cell) => cell.getState().state));
         console.log(prettyBoard);
     }
 
@@ -145,7 +145,7 @@ const unit = function unit(){
         div = targetDiv;
         row = targetDiv.getAttribute("row");
         col = targetDiv.getAttribute("col");
-        console.log(row, col)
+        // console.log(row, col)
         const nextPieceStyle = state === 'x' ? "url(assets/white-sphere.png)" : "url(assets/black-sphere.png)"
         document.documentElement.style.setProperty("--piece-url", nextPieceStyle);
         const pieceDiv = document.createElement("div"); 
@@ -154,8 +154,6 @@ const unit = function unit(){
         } else {
             pieceDiv.classList.add("white-piece");
         }
-        console.log("in set state");
-        console.log(targetDiv);
         targetDiv.append(pieceDiv);
     }
 
@@ -314,6 +312,8 @@ const gameLogicModule = (function gameLogic() {
             gameBoard[row][col].setState(curPlayer.turn, targetDiv);
 
             previousMoves.push(gameBoard[row][col]) // Unit cell
+
+            // console.log(gameBoardModule.checkBoardState(curPlayer.turn, row, col));
                         
             // check if current player wins
             if (gameBoardModule.checkBoardState(curPlayer.turn, row, col)) {
@@ -328,7 +328,7 @@ const gameLogicModule = (function gameLogic() {
                 switchPlayer(curPlayer);
                 pieceColor = curPlayer.turn === 'x' ? 'black' : 'white'; 
                 console.log(`${curPlayer.turn}'s turn!`);
-                console.log(curPlayer.label);
+                // console.log(curPlayer.label);
                 gameInfoIcon.className = `${pieceColor}-piece-info`;
                 if (curPlayer.label == 2) {
                     console.log(difficulty);
@@ -361,7 +361,7 @@ const gameLogicModule = (function gameLogic() {
     const checkSpaceIsEmpty = (board, row, col) => {
         let isAvailable = true;
         let errorMessage = "";
-        console.log(board[row][col].getState().state);
+        // console.log(board[row][col].getState().state);
         if (!!board[row][col].getState().state) {
             
             isAvailable = false;
@@ -427,7 +427,6 @@ const UIModule = (() => {
 
                 if (arg.className === "human-player") {
                     const [playAgainst, ...otherDivs] = document.querySelectorAll(".options");
-                    console.log(otherDivs);
                     for (const option of otherDivs) {
                        for (const child of option.children) {
                         child.id = "disabled-btns";
