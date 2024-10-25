@@ -413,8 +413,6 @@ const aiFactory = function aiPlayer(turn, label) {
 
     return Object.assign({}, ai, { level1Logic, level2Logic });
 };
-
-
 // generated code ends
 
 
@@ -637,7 +635,7 @@ const UIModule = (() => {
     }
 
     addListeners(humanPlayerBtn, cpuPlayerBtn, asBlackBtn, asWhiteBtn, easyBtn,
-        mediumBtn, hardBtn, gameOptionConfirm, gameOptionCancel);
+        mediumBtn, gameOptionConfirm, gameOptionCancel);
 
     undoBtn.addEventListener("click", (event) => {
         const row = event.target.getAttribute("row");
