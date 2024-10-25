@@ -264,29 +264,34 @@ const aiFactory = function aiPlayer(turn, label) {
             return 9000;
         }
 
-        // Rule 3: If opponent can create an open three, block it
+        // Rule 3: If you can create an open-ended connect 4, do it
+        if (createsOpenFour(aiTurn, row, col)) {
+            return 8500;
+        }
+
+        // Rule 4: If opponent can create an open three, block it
         if (createsOpenThree(opponentTurn, row, col)) {
             return 8000;
         }
 
-        // Rule 4: If you can create an open three, do it
+        // Rule 5: If you can create an open three, do it
         if (createsOpenThree(aiTurn, row, col)) {
             return 7000;
         }
 
-        // Rule 5: Extend your own lines
+        // Rule 6: Extend your own lines
         let maxLineLength = getMaxLineLength(aiTurn, row, col);
         if (maxLineLength >= 2) {
             priority = 6000 + maxLineLength * 10;
         }
 
-        // Rule 6: Block opponent's potential lines
+        // Rule 7: Block opponent's potential lines
         let opponentLineLength = getMaxLineLength(opponentTurn, row, col);
         if (opponentLineLength >= 3) {
             priority = Math.max(priority, 5000 + opponentLineLength * 10);
         }
 
-        // Rule 7: Control the center
+        // Rule 8: Control the center
         const centerDistance = Math.abs(row - 7) + Math.abs(col - 7);
         priority += (7 - centerDistance); // Closer to center gets higher priority
 
@@ -314,6 +319,10 @@ const aiFactory = function aiPlayer(turn, label) {
         gameBoard[row][col].clearState();
 
         return isWinningMove;
+    };
+
+    const createsOpenFour = (player, row, col) => {
+        return hasPattern(player, row, col, 4, 2);
     };
 
     const createsOpenThree = (player, row, col) => {
