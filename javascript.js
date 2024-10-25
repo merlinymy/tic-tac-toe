@@ -202,7 +202,6 @@ const aiFactory = function aiPlayer(turn, label) {
     const aiTurn = turn; // 'x' or 'o'
     const opponentTurn = aiTurn === 'x' ? 'o' : 'x';
     const gameBoard = gameBoardModule.board;
-    const previousMoves = gameBoardModule.previousMoves; //arr
 
     // Level 1 Logic: Random Move
     const level1Logic = () => {
@@ -216,196 +215,193 @@ const aiFactory = function aiPlayer(turn, label) {
 
     // Level 2 Logic: Rule-Based AI
     const level2Logic = () => {
-        // If AI is white and it's the first move, prioritize center
-        if (aiTurn === 'o' && isFirstMove()) {
-            const centerRow = 7;
-            const centerCol = 7;
-            if (gameBoard[centerRow][centerCol].getState().state === null) {
-                return { aiRow: centerRow, aiCol: centerCol };
-            } else {
-                // Choose an adjacent cell around the center
-                const adjacentCells = getAdjacentEmptyCells(centerRow, centerCol);
-                if (adjacentCells.length > 0) {
-                    return adjacentCells[0]; // Return the first available adjacent cell
-                }
-            }
-        }
-
-        // Try to win
-        console.log("try to win");
-        let move = findWinningMove(aiTurn);
-        if (move) return move;
-
-        console.log("block win");
-        // Block opponent's winning move
-        move = findWinningMove(opponentTurn);
-        if (move) return move;
-
-        console.log("block 3");
-        // Block opponent's connect 3
-        move = findBlockingMove(opponentTurn, 3);
-        if (move) return move;
-
-        console.log("build");
-        // Try to build our own connect 3 or 4
-        move = findBuildingMove(aiTurn);
-        if (move) return move;
-
-        // Fallback to random move
-        return level1Logic();
-    };
-
-    // Helper Functions
-    const isFirstMove = () => {
-        // Check if the AI has made any moves yet
-        for (let row = 0; row < 15; row++) {
-            for (let col = 0; col < 15; col++) {
-                if (gameBoard[row][col].getState().state === aiTurn) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    };
-
-    const getAdjacentEmptyCells = (row, col) => {
-        const directions = [
-            { dr: -1, dc: 0 },
-            { dr: 1, dc: 0 },
-            { dr: 0, dc: -1 },
-            { dr: 0, dc: 1 },
-            { dr: -1, dc: -1 },
-            { dr: -1, dc: 1 },
-            { dr: 1, dc: -1 },
-            { dr: 1, dc: 1 },
-        ];
-        const cells = [];
-        for (let dir of directions) {
-            const r = row + dir.dr;
-            const c = col + dir.dc;
-            if (isValidCell(r, c) && gameBoard[r][c].getState().state === null) {
-                cells.push({ aiRow: r, aiCol: c });
-            }
-        }
-        return cells;
-    };
-
-    const findWinningMove = (player) => {
-        for (let row = 0; row < 15; row++) {
-            for (let col = 0; col < 15; col++) {
-                if (gameBoard[row][col].getState().state === null) {
-                    gameBoard[row][col].setState(player);
-                    if (gameBoardModule.checkBoardState(player, row, col)) {
-                        gameBoard[row][col].clearState();
-                        return { aiRow: row, aiCol: col };
-                    }
-                    gameBoard[row][col].clearState();
-                }
-            }
-        }
-        return null;
-    };
-
-    const findBlockingMove = (player, count) => {
-        for (let row = 0; row < 15; row++) {
-            for (let col = 0; col < 15; col++) {
-                if (gameBoard[row][col].getState().state === null) {
-                    gameBoard[row][col].setState(player);
-                    if (hasNInRow(player, row, col, count + 1)) {
-                        gameBoard[row][col].clearState();
-                        return { aiRow: row, aiCol: col };
-                    }
-                    gameBoard[row][col].clearState();
-                }
-            }
-        }
-        return null;
-    };
-
-    const findBuildingMove = (player) => {
+        // Scan the entire board and evaluate each possible move
         let bestMove = null;
-        let maxCount = 0;
+        let highestPriority = -1;
+
         for (let row = 0; row < 15; row++) {
             for (let col = 0; col < 15; col++) {
                 if (gameBoard[row][col].getState().state === null) {
-                    gameBoard[row][col].setState(player);
-                    let count = getMaxLineLength(player, row, col);
-                    if (count > maxCount) {
-                        maxCount = count;
+                    // For each empty cell, simulate placing the AI's stone
+                    gameBoard[row][col].setState(aiTurn);
+
+                    // Evaluate the move according to the rules
+                    const priority = evaluateMove(row, col);
+
+                    // Keep track of the move with the highest priority
+                    if (priority > highestPriority) {
+                        highestPriority = priority;
                         bestMove = { aiRow: row, aiCol: col };
                     }
+
+                    // Undo the move
                     gameBoard[row][col].clearState();
                 }
             }
         }
-        console.log(bestMove);
-        return bestMove;
+
+        // If no move found (shouldn't happen), fallback to random move
+        if (bestMove) {
+            return bestMove;
+        } else {
+            return level1Logic();
+        }
     };
 
-    const hasNInRow = (player, row, col, n) => {
-        const directions = [
-            { dr: -1, dc: 0 },
-            { dr: 1, dc: 0 },
-            { dr: 0, dc: -1 },
-            { dr: 0, dc: 1 },
-            { dr: -1, dc: -1 },
-            { dr: -1, dc: 1 },
-            { dr: 1, dc: -1 },
-            { dr: 1, dc: 1 },
-        ];
+    // Evaluation function
+    const evaluateMove = (row, col) => {
+        // Priorities are assigned based on the rules
+        // Higher number means higher priority
+        let priority = 0;
+
+        // Rule 1: If opponent can win next turn, block it immediately
+        if (opponentCanWinNextTurn(row, col)) {
+            return 10000; // Highest priority
+        }
+
+        // Rule 2: If you can win this turn, do it
+        if (canWinThisTurn(aiTurn, row, col)) {
+            return 9000;
+        }
+
+        // Rule 3: If opponent can create an open three, block it
+        if (createsOpenThree(opponentTurn, row, col)) {
+            return 8000;
+        }
+
+        // Rule 4: If you can create an open three, do it
+        if (createsOpenThree(aiTurn, row, col)) {
+            return 7000;
+        }
+
+        // Rule 5: Extend your own lines
+        let maxLineLength = getMaxLineLength(aiTurn, row, col);
+        if (maxLineLength >= 2) {
+            priority = 6000 + maxLineLength * 10;
+        }
+
+        // Rule 6: Block opponent's potential lines
+        let opponentLineLength = getMaxLineLength(opponentTurn, row, col);
+        if (opponentLineLength >= 3) {
+            priority = Math.max(priority, 5000 + opponentLineLength * 10);
+        }
+
+        // Rule 7: Control the center
+        const centerDistance = Math.abs(row - 7) + Math.abs(col - 7);
+        priority += (7 - centerDistance); // Closer to center gets higher priority
+
+        return priority;
+    };
+
+    // Helper functions to detect immediate threats
+    const opponentCanWinNextTurn = (row, col) => {
+        // Check if placing at (row, col) blocks opponent's win
+        // Temporarily place opponent's stone to see if they can win
+        gameBoard[row][col].setState(opponentTurn);
+        const canWin = canWinThisTurn(opponentTurn, row, col);
+        gameBoard[row][col].clearState();
+        return canWin;
+    };
+
+    const canWinThisTurn = (player, row, col) => {
+        // Place the stone temporarily
+        gameBoard[row][col].setState(player);
+
+        // Check if this move leads to a win
+        const isWinningMove = gameBoardModule.checkBoardState(player, row, col);
+
+        // Remove the temporary stone
+        gameBoard[row][col].clearState();
+
+        return isWinningMove;
+    };
+
+    const createsOpenThree = (player, row, col) => {
+        return hasPattern(player, row, col, 3, 2);
+    };
+
+    const hasPattern = (player, row, col, length, openEndsRequired) => {
         for (let dir of directions) {
-            let count = 1;
-            let r = row + dir.dr;
-            let c = col + dir.dc;
-            while (isValidCell(r, c) && gameBoard[r][c].getState().state === player) {
-                count++;
-                r += dir.dr;
-                c += dir.dc;
-            }
-            r = row - dir.dr;
-            c = col - dir.dc;
-            while (isValidCell(r, c) && gameBoard[r][c].getState().state === player) {
-                count++;
-                r -= dir.dr;
-                c -= dir.dc;
-            }
-            if (count >= n) {
+            let count = countConsecutiveStones(player, row, col, dir.dr, dir.dc);
+            let openEnds = countOpenEnds(player, row, col, dir.dr, dir.dc);
+            if (count >= length && openEnds >= openEndsRequired) {
                 return true;
             }
         }
         return false;
     };
 
+    const countConsecutiveStones = (player, row, col, dr, dc) => {
+        let count = 1;
+        let r, c;
+
+        // Forward direction
+        r = row + dr;
+        c = col + dc;
+        while (isValidCell(r, c) && gameBoard[r][c].getState().state === player) {
+            count++;
+            r += dr;
+            c += dc;
+        }
+
+        // Backward direction
+        r = row - dr;
+        c = col - dc;
+        while (isValidCell(r, c) && gameBoard[r][c].getState().state === player) {
+            count++;
+            r -= dr;
+            c -= dc;
+        }
+
+        return count;
+    };
+
+    const countOpenEnds = (player, row, col, dr, dc) => {
+        let openEnds = 0;
+        let r, c;
+
+        // Forward direction
+        r = row + dr;
+        c = col + dc;
+        while (isValidCell(r, c) && gameBoard[r][c].getState().state === player) {
+            r += dr;
+            c += dc;
+        }
+        if (isValidCell(r, c) && gameBoard[r][c].getState().state === null) {
+            openEnds++;
+        }
+
+        // Backward direction
+        r = row - dr;
+        c = col - dc;
+        while (isValidCell(r, c) && gameBoard[r][c].getState().state === player) {
+            r -= dr;
+            c -= dc;
+        }
+        if (isValidCell(r, c) && gameBoard[r][c].getState().state === null) {
+            openEnds++;
+        }
+
+        return openEnds;
+    };
+
     const getMaxLineLength = (player, row, col) => {
-        const directions = [
-            { dr: -1, dc: 0 },
-            { dr: 0, dc: -1 },
-            { dr: -1, dc: -1 },
-            { dr: -1, dc: 1 },
-        ];
-        let maxCount = 1;
+        let maxLength = 0;
         for (let dir of directions) {
-            let count = 1;
-            let r = row + dir.dr;
-            let c = col + dir.dc;
-            while (isValidCell(r, c) && gameBoard[r][c].getState().state === player) {
-                count++;
-                r += dir.dr;
-                c += dir.dc;
-            }
-            r = row - dir.dr;
-            c = col - dir.dc;
-            while (isValidCell(r, c) && gameBoard[r][c].getState().state === player) {
-                count++;
-                r -= dir.dr;
-                c -= dir.dc;
-            }
-            if (count > maxCount) {
-                maxCount = count;
+            let length = countConsecutiveStones(player, row, col, dir.dr, dir.dc);
+            if (length > maxLength) {
+                maxLength = length;
             }
         }
-        return maxCount;
+        return maxLength;
     };
+
+    const directions = [
+        { dr: -1, dc: 0 },  // Vertical
+        { dr: 0, dc: -1 },  // Horizontal
+        { dr: -1, dc: -1 }, // Diagonal \
+        { dr: -1, dc: 1 },  // Diagonal /
+    ];
 
     const isValidCell = (row, col) => {
         return row >= 0 && row < 15 && col >= 0 && col < 15;
@@ -413,6 +409,7 @@ const aiFactory = function aiPlayer(turn, label) {
 
     return Object.assign({}, ai, { level1Logic, level2Logic });
 };
+
 // generated code ends
 
 
