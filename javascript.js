@@ -241,14 +241,14 @@ const aiFactory = function aiPlayer(turn, label) {
         move = findWinningMove(opponentTurn);
         if (move) return move;
 
-        console.log("build");
-        // Try to build our own connect 3 or 4
-        move = findBuildingMove(aiTurn);
-        if (move) return move;
-        
         console.log("block 3");
         // Block opponent's connect 3
         move = findBlockingMove(opponentTurn, 3);
+        if (move) return move;
+
+        console.log("build");
+        // Try to build our own connect 3 or 4
+        move = findBuildingMove(aiTurn);
         if (move) return move;
 
         // Fallback to random move
